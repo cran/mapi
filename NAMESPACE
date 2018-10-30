@@ -1,0 +1,3 @@
+useDynLib(mapi, .registration=TRUE)
+exportPattern("^((MAPI_[[:alpha:]]+)|(mapi.*))")
+importFrom(Rcpp, evalCpp)
