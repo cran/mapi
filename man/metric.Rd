@@ -5,7 +5,7 @@
 data("metric")
 }
 \value{
-A data.table object with 19900 rows (one per sample pair, un-symmetrized) and 3 columns ("ind1", "ind2", "value") 
+A data.table object with 19900 rows (one per sample pair, non symmetrical) and 3 columns ("ind1", "ind2", "value") 
 containing respectively the first sample name, the second sample name and the value of their relation.
 }
 \description{

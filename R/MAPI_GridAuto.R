@@ -17,7 +17,7 @@
 #' The halfwidth cell value used to build the grid is computed as 
 #'   \eqn{h_w = \frac{\beta \sqrt{A/N}}{\sqrt{2.5980}}}{hw = p / sqrt(2.5980) with p = beta * sqrt(A/N)}, 
 #'   where A is the study area (convex hull of sampling points) and N the number of samples. 
-#' Parameter beta allows to repect the Nyquist-Shannon sampling theorem depending on sampling regularity 
+#' Parameter beta allows to respect the Nyquist-Shannon sampling theorem depending on sampling regularity 
 #'   (call to \code{\link{MAPI_EstimateHalfwidth}}).
 #' 
 #' @return a spatial object of class 'sf' including the x and y coordinates of cell centers, cell geometry (polygons) and cell id (gid).

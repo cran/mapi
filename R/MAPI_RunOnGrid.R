@@ -24,7 +24,7 @@
 #' @param dMin minimum distance between individuals. 0 by default.
 #' @param dMax maximal distance between individuals. +Inf by default.
 #' @param nbCores number of CPU cores you want to use during parallel computation. 
-#'   The default value is estimated as the number of available cores minus 1, suitable for a personnal computer. 
+#'   The default value is estimated as the number of available cores minus 1, suitable for a personal computer. 
 #'   On a cluster you might have to set it to a reasonable value (eg. 8) in order to keep resources for other tasks. 
 #' @param N number of points used per quarter of ellipse, 8 by default. 
 #'   Don't change it unless you really know what you are doing.
@@ -36,14 +36,14 @@
 #'  - avg_value: weighted mean of the pairwise metric \cr
 #'  - sum_wgts: sum of weights of ellipses used to compute the weighted mean \cr
 #'  - w_stdev: weighted standard deviation of the pairwise metric \cr
-#'  - swQ: centile of the sum of weights \cr
+#'  - swQ: percentile of the sum of weights \cr
 #'  - geometry \cr
 #'  When permutations are performed: \cr
 #'  - permuts: list of the weighted mean values obtained from all permutations \cr
 #'  - proba: proportion of the permuted weighted means below the observed weighted mean \cr
 #'  - ltP: lower-tail p-value adjusted using the FDR procedure of Benjamini and Yekutieli \cr
 #'  - utP: upper-tail p-value adjusted using the FDR procedure of Benjamini and Yekutieli \cr
-#'   
+#' 
 #' @details
 #' To test whether the pairwise metric values associated with the ellipses are independent of the sample locations, those are permuted 'nbPermuts' times. 
 #'   At each permutation, new cell values are computed and stored to build a cumulative null distribution for each cell of the grid. 
@@ -73,8 +73,7 @@
 #' }
 #' 
 
-MAPI_RunOnGrid <- function(samples, metric, grid, isMatrix=FALSE, ecc=0.975, errRad=10, nbPermuts=0, dMin=0, dMax=Inf, nbCores=ifelse(requireNamespace("parallel", quietly=TRUE), parallel::detectCores()-1, 1), N=8) {
-	
+MAPI_RunOnGrid <- function(samples, metric, grid, isMatrix=FALSE, ecc=0.975, errRad=10, nbPermuts=0, dMin=0, dMax=Inf, nbCores=ifelse(base::requireNamespace("parallel", quietly=TRUE), parallel::detectCores()-1, 1), N=8) {
 	message("MAPI COMPUTATION STARTED")
 	tot <- system.time({
 		data <- MAPI_CheckData(samples, metric, isMatrix=isMatrix)
@@ -149,7 +148,8 @@ MAPI_RunOnGrid <- function(samples, metric, grid, isMatrix=FALSE, ecc=0.975, err
 			data.table::setkey(ells, "rowid")
 		})
 		tv <- as.vector(t) ; tv[is.na(tv)] <- 0.0
-		message(sprintf("... %d ellipses.    [user: %0.3f, system: %0.3f, elapsed: %0.3f seconds]", nrow(ellipses), tv[1]+tv[4], tv[2]+tv[5], tv[3]))
+		# NOTE: %s used for stringified integers due to overflow for very large datasets (thanks to Simon Dellicour)
+		message(sprintf("... %s ellipses.    [user: %0.3f, system: %0.3f, elapsed: %0.3f seconds]", as.character(nrow(ellipses)), tv[1]+tv[4], tv[2]+tv[5], tv[3]))
 		
 		
 		## Spatial intersect between ellipses and grid
@@ -188,7 +188,8 @@ MAPI_RunOnGrid <- function(samples, metric, grid, isMatrix=FALSE, ecc=0.975, err
 			rm(my.sampleCode.locCode, sampX_12, sampX_21) # free memory
 		})
 		tv <- as.vector(t) ; tv[is.na(tv)] <- 0.0
-		message(sprintf("... %d sample pairs.  [user: %0.3f, system: %0.3f, elapsed: %0.3f seconds]", nrow(sampX), tv[1]+tv[4], tv[2]+tv[5], tv[3]))
+		# NOTE: %s used for stringified integers due to overflow for very large datasets (thanks to Simon Dellicour)
+		message(sprintf("... %s sample pairs.  [user: %0.3f, system: %0.3f, elapsed: %0.3f seconds]", as.character(nrow(sampX)), tv[1]+tv[4], tv[2]+tv[5], tv[3]))
 		
 		
 		## Expand results from intersection between grid and ellipses into a clean list of vectors of sample pairs ids
@@ -214,7 +215,8 @@ MAPI_RunOnGrid <- function(samples, metric, grid, isMatrix=FALSE, ecc=0.975, err
 		})
 		tv <- as.vector(t) ; tv[is.na(tv)] <- 0.0
 		if (is.na(nbMatches)) { nbMatches <- 0 }
-		message(sprintf("... %d matches found.  [user: %0.3f, system: %0.3f, elapsed: %0.3f seconds]", nbMatches, tv[1]+tv[4], tv[2]+tv[5], tv[3]))
+		# NOTE: %s used for stringified integers due to overflow for very large datasets (thanks to Simon Dellicour)
+		message(sprintf("... %s matches found.  [user: %0.3f, system: %0.3f, elapsed: %0.3f seconds]", as.character(nbMatches), tv[1]+tv[4], tv[2]+tv[5], tv[3]))
 		
 		
 		## Get results for unpermuted MAPI analysis
@@ -225,7 +227,7 @@ MAPI_RunOnGrid <- function(samples, metric, grid, isMatrix=FALSE, ecc=0.975, err
 			resu <- data.table::as.data.table(parseInter_cpp(grid$gid, inter, sampX$weight, sampX$value))
 			colnames(resu) <- c("gid", "nb_ell", "avg_value", "sum_wgts", "w_stdev")
 			data.table::setkey(resu, "gid")
-			# computes sum-of-weights centiles
+			# computes sum-of-weights percentile
 			resu$swQ <- unclass(.bincode(resu$sum_wgts, stats::quantile(resu$sum_wgts, 0:100/100.0, na.rm=TRUE), include.lowest=TRUE))
 			# merge to grid for getting geometry
 			resu <- merge(grid, resu, by="gid", all.x=TRUE)
@@ -274,14 +276,14 @@ MAPI_RunOnGrid <- function(samples, metric, grid, isMatrix=FALSE, ecc=0.975, err
 				gc(verbose=FALSE)
 				
 				# run permutation function (parallel or not)
-				if (requireNamespace("pbapply", quietly=TRUE) && nbCores > 1) {
+				if (base::requireNamespace("pbapply", quietly=TRUE) && nbCores > 1) {
 					message(sprintf("... parallelized over %d cores ...", nbCores))
 					# iterate (parallelized) on permuted results table columns
 					resu2 <- pbapply::pbapply(resu2, 2, doPerm, cl=nbCores)
 				} else {
 					message(sprintf("... unparallelized ..."))
 					# try to set up a progress bar
-					if (requireNamespace("progress", quietly=TRUE)) {
+					if (base::requireNamespace("progress", quietly=TRUE)) {
 						pb <- progress::progress_bar$new(total=nbPermuts)
 					}
 					# iterate (un parallelized) on permuted results table columns

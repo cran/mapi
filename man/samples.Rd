@@ -9,7 +9,7 @@ A data.table object with 200 simulated individuals (one per row) and 4 columns (
 including the sample names, coordinates x and y and an error circle radius on coordinates.
 }
 \description{
-Test dataset provided with the MAPI pacakge. We used generation-by-generation coalescent algorithms 
+Test dataset provided with the MAPI package. We used generation-by-generation coalescent algorithms 
 (Hudson et al., 1990) to simulate 10 microsatellite genotypes at migration-mutation-drift equilibrium 
 for 200 diploid individuals, distributed on the nodes of a 20x10 lattice.
 
@@ -23,7 +23,7 @@ Simcoal2 (Laval and Excoffier, 2004) to generate two panmictic populations of eq
 \eqn{N_e = 100} and exchanging \eqn{N_{e}m = 0.1} migrants at each generation. The barrier to gene
 flow bisected the lattice from north to south in its center.
 
-The differenciation values computed between these samples is described in the \code{\link{metric}} section.
+The differentiation values computed between these samples is described in the \code{\link{metric}} section.
 }
 \examples{
 data("samples")

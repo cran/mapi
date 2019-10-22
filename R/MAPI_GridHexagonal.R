@@ -26,7 +26,6 @@
 #' 
 
 MAPI_GridHexagonal <- function(samples, crs, hw, buf=0, shift=FALSE) {
-  
   message("Building grid...")
   
   # Convert samples into spatial sf object

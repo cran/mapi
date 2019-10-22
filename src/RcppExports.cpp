@@ -16,6 +16,20 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// getValues_cpp
+Rcpp::List getValues_cpp(Rcpp::NumericVector cells, Rcpp::List inter, Rcpp::DoubleVector weights, Rcpp::DoubleVector values);
+RcppExport SEXP _mapi_getValues_cpp(SEXP cellsSEXP, SEXP interSEXP, SEXP weightsSEXP, SEXP valuesSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type cells(cellsSEXP);
+    Rcpp::traits::input_parameter< Rcpp::List >::type inter(interSEXP);
+    Rcpp::traits::input_parameter< Rcpp::DoubleVector >::type weights(weightsSEXP);
+    Rcpp::traits::input_parameter< Rcpp::DoubleVector >::type values(valuesSEXP);
+    rcpp_result_gen = Rcpp::wrap(getValues_cpp(cells, inter, weights, values));
+    return rcpp_result_gen;
+END_RCPP
+}
 // parseInter_cpp
 Rcpp::NumericMatrix parseInter_cpp(Rcpp::NumericVector cells, Rcpp::List inter, Rcpp::DoubleVector weights, Rcpp::DoubleVector values);
 RcppExport SEXP _mapi_parseInter_cpp(SEXP cellsSEXP, SEXP interSEXP, SEXP weightsSEXP, SEXP valuesSEXP) {
@@ -60,6 +74,7 @@ END_RCPP
 
 static const R_CallMethodDef CallEntries[] = {
     {"_mapi_countMatches_cpp", (DL_FUNC) &_mapi_countMatches_cpp, 1},
+    {"_mapi_getValues_cpp", (DL_FUNC) &_mapi_getValues_cpp, 4},
     {"_mapi_parseInter_cpp", (DL_FUNC) &_mapi_parseInter_cpp, 4},
     {"_mapi_parseInterPerm_cpp", (DL_FUNC) &_mapi_parseInterPerm_cpp, 4},
     {"_mapi_mkP4st_cpp", (DL_FUNC) &_mapi_mkP4st_cpp, 3},

@@ -27,7 +27,7 @@
 #' @param dMin minimum distance between individuals. 0 by default.
 #' @param dMax maximal distance between individuals. +Inf by default.
 #' @param nbCores number of CPU cores you want to use during parallel computation. 
-#'   The default value is estimated as the number of available cores minus 1, suitable for a personnal computer. 
+#'   The default value is estimated as the number of available cores minus 1, suitable for a personal computer. 
 #'   On a cluster you might have to set it to a reasonable value (eg. 8) in order to keep resources for other tasks. 
 #' @param N number of points used per quarter of ellipse, 8 by default. 
 #'   Don't change it unless you really know what you are doing.
@@ -39,7 +39,7 @@
 #' - avg_value: weighted mean of the pairwise metric \cr
 #' - sum_wgts: sum of weights of ellipses used to compute the weighted mean \cr
 #' - w_stdev: weighted standard deviation of the pairwise metric \cr
-#' - swQ: centile of the sum of weights \cr
+#' - swQ: percentile of the sum of weights \cr
 #' - geometry \cr
 #' When permutations are performed: \cr
 #' - permuts: list of the weighted mean values obtained from all permutations \cr
@@ -73,7 +73,7 @@
 #' }
 #' 
 
-MAPI_RunAuto <- function(samples, metric, crs, isMatrix=(class(metric)=="matrix" && nrow(metric)==ncol(metric)), beta=0.25, ecc=0.975, buf=0, errRad=10, nbPermuts=0, dMin=0, dMax=Inf, nbCores=ifelse(requireNamespace("parallel", quietly=TRUE), parallel::detectCores()-1, 1), N=8) {
+MAPI_RunAuto <- function(samples, metric, crs, isMatrix=all(class(metric)=="matrix", nrow(metric)==ncol(metric)), beta=0.25, ecc=0.975, buf=0, errRad=10, nbPermuts=0, dMin=0, dMax=Inf, nbCores=ifelse(requireNamespace("parallel", quietly=TRUE), parallel::detectCores()-1, 1), N=8) {
 	data <- MAPI_CheckData(samples, metric, isMatrix=isMatrix)
 	my.samples <- data[[1]]
 	my.metric <- data[[2]]

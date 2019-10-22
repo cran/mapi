@@ -15,14 +15,18 @@
 #' @return a list of two data.table objects corresponding to 'samples' and 'metric' after cleaning.
 #' 
 #' @examples
+#' \dontrun{
 #' data("samples")
 #' data("metric")
+#' # remove first sample in order to force warning
+#' samples <- samples[-c(1) , ]
 #' clean.list <- MAPI_CheckData(samples, metric)
-#' checked.samples <- clean.list[[1]]
-#' checked.metric <- clean.list[[2]]
-#'
+#' checked.samples <- clean.list[['samples']]
+#' checked.metric <- clean.list[['metric']]
+#' }
+#' 
 
-MAPI_CheckData <- function(samples, metric, isMatrix=(class(metric)=="matrix" && nrow(metric)==ncol(metric))) {
+MAPI_CheckData <- function(samples, metric, isMatrix=all((class(metric)=="matrix"), (nrow(metric)==ncol(metric)))) {
   
 	message("Checking data...")
 	
@@ -49,6 +53,7 @@ MAPI_CheckData <- function(samples, metric, isMatrix=(class(metric)=="matrix" &&
 	
 	my.metric$ind1 <- as.character(my.metric$ind1) # Avoids factors...
 	my.metric$ind2 <- as.character(my.metric$ind2) # Avoids factors...
+	my.metric$value <- as.numeric(as.character(my.metric$value)) # Avoids factors...
 	
 	if (anyDuplicated(my.samples$ind)) {
 		stop("Names of individuals are not unique.") 
@@ -57,10 +62,10 @@ MAPI_CheckData <- function(samples, metric, isMatrix=(class(metric)=="matrix" &&
 	}
 	
 	my.samples <- my.samples[!(is.na(my.samples$x)|is.na(my.samples$y)) , ]
-	tri <- as.vector(my.samples[ !(my.samples$ind %in% my.metric$ind1) & !(my.samples$ind %in% my.metric$ind2) ,  "ind"])
+	tri <- as.vector(my.samples[ !(my.samples$ind %in% my.metric$ind1) & !(my.samples$ind %in% my.metric$ind2) ,  "ind"]$ind)
 	my.samples <- my.samples[ (my.samples$ind %in% my.metric$ind1) | (my.samples$ind %in% my.metric$ind2) , ]
 	if (length(tri) != 0) {
-		warning(sprintf("Following samples have no metric and have been removed: %s", paste(tri, collapse=", ", quote=FALSE)))
+		warning(sprintf("Following samples have no metric and have been removed: %s", paste(tri, collapse=", ")))
 	} else {
 		message("All samples used in metric ... OK")
 	}
@@ -71,7 +76,7 @@ MAPI_CheckData <- function(samples, metric, isMatrix=(class(metric)=="matrix" &&
 	tri <- tri[ !duplicated(tri) ]
 	if (length(tri) != 0) {
 		my.metric <- my.metric[ (my.metric$ind1 %in% my.samples$ind)&(my.metric$ind2 %in% my.samples$ind) , ] 
-		warning(sprintf("Following samples have been removed from metric: %s", paste(tri, collapse=", ", quote=FALSE)))
+		warning(sprintf("Following samples have been removed from metric: %s", paste(tri, collapse=", ")))
 	}
 
 	# in case of half-matrix, make a full one
@@ -81,7 +86,7 @@ MAPI_CheckData <- function(samples, metric, isMatrix=(class(metric)=="matrix" &&
 	data.table::setkey(my.metric, "ind1", "ind2")
 	my.metric <- my.metric[order(as.character(my.metric$ind1),as.character(my.metric$ind2)),]
 
-	message(sprintf("... %d samples and %d metric left.", nrow(my.samples), nrow(my.metric)))
+	message(paste("...",  nrow(my.samples), "samples and",  nrow(my.metric), "metric left."))
 	
-	return( list(my.samples, my.metric) )
+	return( list(samples=my.samples, metric=my.metric) )
 }

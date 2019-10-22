@@ -8,10 +8,10 @@ MAPI_EstimateHalfwidth(samples, crs, beta = 0.25)
 }
 \arguments{
 \item{samples}{a data.frame with names and geographical coordinates of samples. Column names must be: 'ind', 'x', 'y'.
-Optional column 'errRad' with an error radius for sample locations (eg. GPS uncertainty). 
+Optional column 'errRad' with an error radius for sample locations (eg. GPS uncertainty).
 Coordinates must be projected (not latitude/longitude).}
 
-\item{crs}{coordinate reference system: integer with the EPSG code, or character with proj4string. 
+\item{crs}{coordinate reference system: integer with the EPSG code, or character with proj4string.
 The coordinates system must be a projection, not latitude/longitude.}
 
 \item{beta}{A value depending on spatial regularity of sampling: 0.5 for regular sampling, 0.25 for random sampling (Hengl, 2006).}
@@ -23,8 +23,8 @@ halfwidth cell value (side length of hexagonal cells).
 This function computes the side length (= halfwidth) of the hexagonal cells. Halfwidth value can be further used to build a MAPI grid.
 }
 \details{
-\eqn{h_w = \frac{\beta \sqrt{A/N}}{\sqrt{2.5980}}}{hw = p / sqrt(2.5980) with p = beta * sqrt(A/N)}, where A is the study area (convex hull of sampling points) and N the number of samples. 
-Parameter beta allows to repect the Nyquist-Shannon sampling theorem depending on sampling regularity.
+\eqn{h_w = \frac{\beta \sqrt{A/N}}{\sqrt{2.5980}}}{hw = p / sqrt(2.5980) with p = beta * sqrt(A/N)}, where A is the study area (convex hull of sampling points) and N the number of samples.
+Parameter beta allows to respect the Nyquist-Shannon sampling theorem depending on sampling regularity.
 }
 \examples{
 data(samples)

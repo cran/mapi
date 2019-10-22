@@ -31,6 +31,36 @@ long countMatches_cpp(Rcpp::List inter) {
   return(resu);
 }
 
+// [[Rcpp::export]]
+Rcpp::List getValues_cpp(Rcpp::NumericVector cells, Rcpp::List inter, Rcpp::DoubleVector weights, Rcpp::DoubleVector values) {
+  int n = inter.size();
+  Rcpp::List resu(0);
+  for (int i=0; i<n; i++) {
+    Rcpp::List ells = inter(i);
+    int ne = ells.size();
+    if (ne == 0) {
+        Rcpp::NumericMatrix elem(0,0);
+        resu.push_back(elem);
+    } else {
+      Rcpp::NumericMatrix elem(ne,2);
+      for (int j=0; j<ne; j++) {
+        int ie = int(ells[j]) - 1;
+        if (ie < weights.size()) {
+          double w = weights(ie);
+          double v = values(ie);
+	  elem(j, 0) = v;
+	  elem(j, 1) = w;
+        } else {
+          Rcpp::Rcout << "overflow: ie="<<ie<<"\n";
+          break;
+        }
+      }
+      resu.push_back(elem);
+    }
+  }
+  return(resu);
+}
+
 // //' Function parseInter_cpp
 // //' 
 // //' From the list of integer vectors which represents the intersection of grid cells and ellipses, this function returns a numeric matrix with one row per grid cell and five columns : cell gid, the number of intersecting ellipses, the weighted-averaged value of intesecting ellipses values, the sum of intersecting ellipses weights and the weighted standard deviation of intesecting ellipses values.

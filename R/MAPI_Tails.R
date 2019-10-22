@@ -6,7 +6,7 @@
 #' 
 #' @param resu A spatial object of class 'sf' resulting from a MAPI analysis done using either
 #'    \code{\link{MAPI_RunAuto}} or \code{\link{MAPI_RunOnGrid}}.
-#' @param minQ Threshold under which cells with the smallest sum-of-weights centile (range 1 .. 100) are discarded (default value = 0). 
+#' @param minQ Threshold under which cells with the smallest sum-of-weights percentile (range 1 .. 100) are discarded (default value = 0). 
 #'   This parameter allows to discard cells for which the average value of the pairwise metric is computed 
 #'   using either a small number and/or only long-distance ellipses.
 #' @param alpha Significance level (default=0.05)
@@ -23,7 +23,7 @@
 #'    set to 0.05, this means that 5\% of the cells detected as significant can be false positives.
 #'    
 #'    Significant cells belonging to the lower (or upper) tail that are spatially connected are aggregated 
-#'    together to form the significant areas with the lowest (or greater) average values of the pairwise metric analysed.
+#'    together to form the significant areas with the lowest (or greater) average values of the pairwise metric analyzed.
 #' 
 #' @examples
 #' \dontrun{
@@ -45,7 +45,7 @@ MAPI_Tails <- function(resu, minQ=0, alpha=0.05) {
 	
 	# check data availability
 	if (any(colnames(resu)=="ltP") || any(colnames(resu)=="utP")) {
-		message(sprintf("Significant areas aggregation, with centile filter minQ > %d and alpha = %f ...", minQ, alpha))
+		message(sprintf("Significant areas aggregation, with percentile filter minQ > %d and alpha = %f ...", minQ, alpha))
 	} else {
 		stop("Error: no adjusted probabiblites for lower- and upper-tail columns (\"ltP\", \"utP\") found in results table provided.")
 	}
@@ -55,7 +55,7 @@ MAPI_Tails <- function(resu, minQ=0, alpha=0.05) {
 		stop(sprintf("Incorrect value for parameter alpha: %f (Range: [0, 0.5])", minQ))
 	}
 	
-	# Allow sum-of-weights centile filtering
+	# Allow sum-of-weights percentile filtering
 	if (minQ > 0) {
 		my.resu <- resu[ resu$swQ > minQ , ]
 	} else if (minQ <= 100) {

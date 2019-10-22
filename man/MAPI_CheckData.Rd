@@ -4,14 +4,14 @@
 \alias{MAPI_CheckData}
 \title{Function MAPI_CheckData}
 \usage{
-MAPI_CheckData(samples, metric, isMatrix = (class(metric) == "matrix" &&
-  nrow(metric) == ncol(metric)))
+MAPI_CheckData(samples, metric, isMatrix = all((class(metric) ==
+  "matrix"), (nrow(metric) == ncol(metric))))
 }
 \arguments{
 \item{samples}{a data.frame with names and geographical coordinates of samples. Column names must be: 'ind', 'x', 'y'.
 Optional column 'errRad' with an error radius for sample locations (eg. GPS uncertainty). Coordinates must be projected (not latitude/longitude).}
 
-\item{metric}{a data.frame or a square matrix with the pairwise metric computed for all pairs of samples. 
+\item{metric}{a data.frame or a square matrix with the pairwise metric computed for all pairs of samples.
 If data.frame, column names must be: 'ind1', 'ind2', 'value'.  If matrix, sample names must be the row- and column names.}
 
 \item{isMatrix}{Boolean. Depends on the 'metric' data:\cr
@@ -27,10 +27,14 @@ Check the validity of the 'samples' and 'metric' data loaded.\cr
 Missing data are removed from 'metric', samples with missing coordinates are removed and samples that are not present in both dataset ('samples' and 'metric') are discarded.
 }
 \examples{
+\dontrun{
 data("samples")
 data("metric")
+# remove first sample in order to force warning
+samples <- samples[-c(1) , ]
 clean.list <- MAPI_CheckData(samples, metric)
-checked.samples <- clean.list[[1]]
-checked.metric <- clean.list[[2]]
+checked.samples <- clean.list[['samples']]
+checked.metric <- clean.list[['metric']]
+}
 
 }

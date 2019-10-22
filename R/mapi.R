@@ -1,13 +1,16 @@
 #' @title MAPI, general presentation
 #' @name mapi
 #' @aliases mapi-package
-#' @import Rcpp
 #' @import data.table
 #' @import sf
 #' @import stats
-#' @export
+#' @import parallel
+#' @import pbapply
+## usethis namespace: start
+#' @useDynLib mapi
+#' @importFrom Rcpp sourceCpp
+## usethis namespace: end
 #' @docType package
-#' 
 #' 
 #' @description 
 #' MAPI is an exploratory method providing graphical representations of the spatial variation of 
@@ -22,7 +25,7 @@
 #' Each elliptical polygon is associated to 1) the value of the pairwise metric computed between the samples 
 #' it connects and 2) a weight corresponding to the inverse of its area (i.e. larger ellipses have lower weights).
 #' 
-#' Each cell of the grid receives the weigthed mean of the pairwise metric values associated to the ellipses intersecting the cell.
+#' Each cell of the grid receives the weighted mean of the pairwise metric values associated to the ellipses intersecting the cell.
 #' }
 #' \figure{fig3D.png}\cr
 #' \emph{Figure 1: Schematic principle of the MAPI method from Piry et al. 2016.}
@@ -32,9 +35,9 @@
 #'   The analysis requires two tables (data.frame or data.table):
 #' 
 #'   1) Information on samples: table with three mandatory columns and column names: 'ind' (sample name), 'x' and 'y' (projected coordinates). 
-#'   An optional column 'errRed' (radius of error circle on sample coordinates) can be provided.
+#'   An optional column 'errRad' (radius of error circle on sample coordinates) can be provided.
 #' 
-#'   MAPI requires cartesian coordinates (ie. projected, such as UTM or Lambert) NOT [yet?] angular coordinates (eg. latitude/longitude).
+#'   MAPI requires cartesian coordinates (ie. projected, such as UTM or Lambert) NOT (yet?) angular coordinates (eg. latitude/longitude).
 #'   The package \pkg{sf} provides the \code{st_transform} function for coordinates transformation and projection.
 #'   GIS software such as QGis can also help with datum transformation.
 #'   
@@ -70,7 +73,7 @@
 #' }
 #' 
 #' \subsection{Try it}{
-#'  Using the test dataset ('samples' and 'metric') included in the pacakge, let's run an (almost) automatic MAPI analysis
+#'  Using the test dataset ('samples' and 'metric') included in the package, let's run an (almost) automatic MAPI analysis
 #' 
 #'  Test data result from population genetic simulations in which two panmictic populations are
 #'  separated by a barrier to dispersal. As we use dummy coordinates, there is no appropriate crs, so we just use 'crs=3857' 
@@ -78,7 +81,7 @@
 #'  For a real dataset, 'crs' must be the EPSG code of the projection of your cartesian coordinates.
 #'  
 #'  \preformatted{
-#'  # Load the pacakge
+#'  # Load the package
 #'  library(mapi)
 #'  
 #'  # Load 'samples' data
@@ -99,14 +102,14 @@
 #'  my.tails <- MAPI_Tails(my.results, alpha=0.05)
 #'  
 #'  # Look at the result Figure 2.
-#'  MAPI_Plot(my.results, tails=my.tails)
+#'  MAPI_Plot2(my.results, tails=my.tails)
 #'  }
 #'  Spatial variation of the genetic distance is represented with a color scale from dark brown (lowest values) to dark blue (higher value). The central blue area identified as a significant area of discontinuity corresponds
 #'   to the position of the simulated barrier. Note that due to the permutation procedure, delineation of the significant areas may vary slightly among runs.
 #'  
 #' }
 #' \figure{mapiPlotOutput.png}\cr
-#' \emph{Figure 2: MAPI graphical Output produced using the MAPI-Plot function.}
+#' \emph{Figure 2: MAPI graphical Output produced using the MAPI_Plot2 function.}
 #' 
 #' 
 #' 
@@ -122,7 +125,7 @@
 #'    \item{ \code{\link{MAPI_GridHexagonal}} }
 #'    \item{ \code{\link{MAPI_RunOnGrid}} }
 #'    \item{ \code{\link{MAPI_Tails}} }
-#'    \item{ \code{\link{MAPI_Plot}} }
+#'    \item{ \code{\link{MAPI_Plot2}} }
 #'  }
 #'  
 #'  Within this general framework, you may, for example:
@@ -139,7 +142,7 @@
 #' 
 #' 
 #' \subsection{Export results}{
-#' Output tables (weigted mean of the pairwise metric within cell and polygons delineating significant areas of (dis)continuity) are spatial objects built using the package \pkg{sf}. 
+#' Output tables (weighted mean of the pairwise metric within cell and polygons delineating significant areas of (dis)continuity) are spatial objects built using the package \pkg{sf}. 
 #' Refer to \pkg{sf} documentation to export MAPI results in various format.
 #' Below is an example of how MAPI results can be exported as ESRI Shapefiles:\cr
 #' \preformatted{
@@ -150,9 +153,9 @@
 #' st_write(my.tails, dsn=".", layer="myFirstMapiResultTails", 
 #'    driver="ESRI Shapefile", update=TRUE, delete_layer=TRUE)
 #' }
-#' You may now open these files \file{myFirstMapiResult.shp} and \file{myFirstMapiResultTails.shp} in a GIS sofware such as QGis and customize the layout.
+#' You may now open these files \file{myFirstMapiResult.shp} and \file{myFirstMapiResultTails.shp} in a GIS software such as QGis and customize the layout.
 #' 
-#' Overlaying MAPI results with landscape layouts can help in analysing the relationship between environnemental features and spatial genetic patterns (eg. Piry & al., 2016; Piry & al., 2018).
+#' Overlaying MAPI results with landscape layouts can help in analyzing the relationship between environmental features and spatial genetic patterns (eg. Piry & al., 2016; Piry & al., 2018).
 #' }
 #' 
 #' 
@@ -163,11 +166,17 @@
 #'   \emph{Methods in Ecology and Evolution} \bold{7}:(12), 1463–1475. 
 #'   \href{https://doi.org/10.1111/2041-210X.12616}{doi: 10.1111/2041-210X.12616}
 #' }
-#' \subsection{Application of MAPI in Landscape Genetics}{\cr
-#'   Piry, S., Berthier, K., Streiff, R., Cros-Arteil, S., Tatin, L., Foucart, A., Bröder, L., Hochkirch, A., and Chapuis, M.-P. \bold{(2018)}. 
+#' \subsection{Applications of MAPI in Landscape Genetics}{\itemize{
+#'   \item{Piry, S., Berthier, K., Streiff, R., Cros-Arteil, S., Tatin, L., Foucart, A., Bröder, L., Hochkirch, A., and Chapuis, M.-P. \bold{(2018)}. 
 #'   Fine-scale interactions between habitat quality and genetic variation suggest an impact of grazing on the critically endangered Crau Plain grasshopper (Pamphagidae: \emph{Prionotropis rhodanica}). 
 #'   \emph{Journal of Orthoptera Research} \bold{27}, 61–73.
-#'   \href{https://doi.org/10.3897\%2Fjor.27.15036}{doi: 10.3897\%2Fjor.27.15036}
-#' }
+#'   \href{https://doi.org/10.3897/jor.27.15036}{doi: 10.3897/jor.27.15036}}
+#'   \item{Dellicour S, Prunier JG, Piry S, \& al. \bold{(2019)}
+#'   Landscape genetic analyses of \emph{Cervus elaphus} and \emph{Sus scrofa}: comparative study and analytical developments. 
+#'   \emph{Heredity}.
+#'   \href{https://doi.org/10.1038/s41437-019-0183-5}{doi: 10.1038/s41437-019-0183-5}}
+#' }}
 #'
 NULL
+
+
