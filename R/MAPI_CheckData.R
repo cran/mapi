@@ -31,7 +31,10 @@ MAPI_CheckData <- function(samples, metric, isMatrix=all((class(metric)=="matrix
 	message("Checking data...")
 	
 	my.samples <- data.table::as.data.table(samples)
+	base::colnames(my.samples) <- base::tolower(base::colnames(my.samples))
 	my.samples$ind <- as.character(my.samples$ind) # Avoids factors...
+	my.samples$x <- as.numeric(as.character(my.samples$x)) # Avoids factors & convert to numeric...
+	my.samples$y <- as.numeric(as.character(my.samples$y))# Avoids factors & convert to numeric...
 	data.table::setkey(my.samples, "ind")
 	
 	if (isMatrix) {

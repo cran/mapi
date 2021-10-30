@@ -82,7 +82,7 @@ Rcpp::NumericMatrix parseInter_cpp(Rcpp::NumericVector cells, Rcpp::List inter, 
     //Rcpp::Rcout << "i="<< i << "\t gid=" << gid << "\t ne=" << ne << "\n";
     if (ne == 0) {
       resu(i,0) = gid;
-      resu(i,1) = NA_REAL;
+      resu(i,1) = 0;
       resu(i,2) = NA_REAL;
       resu(i,3) = NA_REAL;
       resu(i,4) = NA_REAL;
@@ -92,6 +92,7 @@ Rcpp::NumericMatrix parseInter_cpp(Rcpp::NumericVector cells, Rcpp::List inter, 
       double valuesSum = 0.0;
       double weightsSum = 0.0;
       double squareSum = 0.0;
+      int nbEll = 0;
       for (int j=0; j<ne; j++) {
         int ie = int(ells[j]) - 1;
         if (ie < weights.size()) {
@@ -101,6 +102,7 @@ Rcpp::NumericMatrix parseInter_cpp(Rcpp::NumericVector cells, Rcpp::List inter, 
             valuesSum  += w * v;
             squareSum  += w * pow(v, 2);
             weightsSum += w;
+            nbEll ++;
           }
         } else {
           Rcpp::Rcout << "overflow: ie="<<ie<<"\n";
@@ -112,7 +114,7 @@ Rcpp::NumericMatrix parseInter_cpp(Rcpp::NumericVector cells, Rcpp::List inter, 
       double stdv = sqrt(var);
       //Rcpp::Rcout << gid<<"\t"<<avg<<"\t"<<weightsSum<<"\t"<<ne<<"\n";
       resu(i,0) = gid;
-      resu(i,1) = ne;
+      resu(i,1) = nbEll;
       resu(i,2) = avg;
       resu(i,3) = weightsSum;
       resu(i,4) = stdv;

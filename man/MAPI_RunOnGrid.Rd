@@ -4,10 +4,20 @@
 \alias{MAPI_RunOnGrid}
 \title{Function MAPI_RunOnGrid}
 \usage{
-MAPI_RunOnGrid(samples, metric, grid, isMatrix = FALSE, ecc = 0.975,
-  errRad = 10, nbPermuts = 0, dMin = 0, dMax = Inf,
+MAPI_RunOnGrid(
+  samples,
+  metric,
+  grid,
+  isMatrix = FALSE,
+  ecc = 0.975,
+  errRad = 10,
+  nbPermuts = 0,
+  dMin = 0,
+  dMax = Inf,
   nbCores = ifelse(base::requireNamespace("parallel", quietly = TRUE),
-  parallel::detectCores() - 1, 1), N = 8)
+    parallel::detectCores() - 1, 1),
+  N = 8
+)
 }
 \arguments{
 \item{samples}{a data.frame with names and geographical coordinates of samples.

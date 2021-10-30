@@ -4,11 +4,22 @@
 \alias{MAPI_RunAuto}
 \title{Function MAPI_RunAuto}
 \usage{
-MAPI_RunAuto(samples, metric, crs, isMatrix = all(class(metric) ==
-  "matrix", nrow(metric) == ncol(metric)), beta = 0.25, ecc = 0.975,
-  buf = 0, errRad = 10, nbPermuts = 0, dMin = 0, dMax = Inf,
+MAPI_RunAuto(
+  samples,
+  metric,
+  crs,
+  isMatrix = all(class(metric) == "matrix", nrow(metric) == ncol(metric)),
+  beta = 0.25,
+  ecc = 0.975,
+  buf = 0,
+  errRad = 10,
+  nbPermuts = 0,
+  dMin = 0,
+  dMax = Inf,
   nbCores = ifelse(requireNamespace("parallel", quietly = TRUE),
-  parallel::detectCores() - 1, 1), N = 8)
+    parallel::detectCores() - 1, 1),
+  N = 8
+)
 }
 \arguments{
 \item{samples}{a data.frame with names and geographical coordinates of samples.

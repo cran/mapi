@@ -75,6 +75,7 @@
 
 MAPI_RunOnGrid <- function(samples, metric, grid, isMatrix=FALSE, ecc=0.975, errRad=10, nbPermuts=0, dMin=0, dMax=Inf, nbCores=ifelse(base::requireNamespace("parallel", quietly=TRUE), parallel::detectCores()-1, 1), N=8) {
 	message("MAPI COMPUTATION STARTED")
+	if (!("sf" %in% class(grid))) {stop("grid parameter does not contains a 'sf' object!")}
 	tot <- system.time({
 		data <- MAPI_CheckData(samples, metric, isMatrix=isMatrix)
 		my.samples <- data[[1]]
@@ -89,13 +90,13 @@ MAPI_RunOnGrid <- function(samples, metric, grid, isMatrix=FALSE, ecc=0.975, err
 			my.samples$errRad <- errRad
 		}
 		# get crs value from grid geometry
-		crs <- sf::st_crs(grid)[[1]]
+		crs <- sf::st_crs(grid)
 		# add geometry (point) to samples
 		my.samples.geom <- sf::st_as_sf(my.samples, coords=c("x", "y"), crs=crs, remove=FALSE)
 		
 		## Compute ellipses
 		t <- system.time({
-			message("Building ellipse polygons...")
+			message("Building elliptical polygons...")
 			# create locality code from hex representation of geometry and error radius
 			my.samples.geom$locCode <- as.character(sf::st_as_binary(my.samples.geom$geometry, hex=TRUE))
 			my.samples.geom$locCode <- apply(my.samples.geom, 1, function(r) { paste(r["locCode"], r["errRad"]) })
@@ -153,7 +154,7 @@ MAPI_RunOnGrid <- function(samples, metric, grid, isMatrix=FALSE, ecc=0.975, err
 		
 		
 		## Spatial intersect between ellipses and grid
-		message("Computing spatial intersection between grid cells and ellipses...")
+		message(sprintf("Computing spatial intersection between %d grid cells and ellipses...", nrow(grid)))
 		t <- system.time({
 			inter0 <- sf::st_intersects(grid, ellipses, sparse=TRUE, prepared=TRUE)
 		})

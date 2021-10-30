@@ -31,7 +31,7 @@ A false discovery rate (FDR) procedure (Benjamini and Yekutieli, 2001) is applie
 testing (number of cells) under positive dependency conditions (spatial autocorrelation). An adjusted
 p-value is computed for each cell using the function \code{p.adjust} from the 'stats' package with the method 'BY'.
 The significance level at which FDR is controlled is set through the parameter alpha. For example, when alpha is
-set to 0.05, this means that 5\% of the cells detected as significant can be false positives.
+set to 0.05, this means that 5\\% of the cells detected as significant can be false positives.
 
 Significant cells belonging to the lower (or upper) tail that are spatially connected are aggregated
 together to form the significant areas with the lowest (or greater) average values of the pairwise metric analyzed.

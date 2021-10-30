@@ -149,19 +149,27 @@ Overlaying MAPI results with landscape layouts can help in analyzing the relatio
 }
 \references{
 \subsection{Description of the MAPI method}{\cr
-Piry, S., Chapuis, M.-P., Gauffre, B., Papaïx, J., Cruaud, A., and Berthier, K. \bold{(2016)}.
+Piry S., Chapuis M.-P., Gauffre B., Papaïx J., Cruaud A. and Berthier K. \bold{(2016)}.
 Mapping Averaged Pairwise Information (MAPI): a new exploratory tool to uncover spatial structure.
 \emph{Methods in Ecology and Evolution} \bold{7}:(12), 1463–1475.
-\href{https://doi.org/10.1111/2041-210X.12616}{doi: 10.1111/2041-210X.12616}
+\doi{10.1111/2041-210X.12616}
 }
 \subsection{Applications of MAPI in Landscape Genetics}{\itemize{
-\item{Piry, S., Berthier, K., Streiff, R., Cros-Arteil, S., Tatin, L., Foucart, A., Bröder, L., Hochkirch, A., and Chapuis, M.-P. \bold{(2018)}.
+\item{Larson S., Gagne RB \& al. \bold{2021}
+Translocations maintain genetic diversity and increase connectivity in sea otters, \emph{Enhydra lutris}
+\emph{Marine Mammal Science}
+\doi{10.1111/mms.12841}}
+\item{Stragier C., Piry S., \& al. \bold{2020}.
+Interplay between historical and current features of the cityscape in shaping the genetic structure of the house mouse (\emph{Mus musculus domesticus}) in Dakar (Senegal, West Africa)
+\emph{bioRxiv ; Version 4 of this preprint has been peer-reviewed and is recommended by Peer Community In Ecology (DOI:10.24072/pci.ecology.100044)}
+\doi{10.1101/557066}}
+\item{Piry S., Berthier K., Streiff R., Cros-Arteil S., Tatin L., Foucart A., Bröder L., Hochkirch A., and Chapuis M.-P. \bold{(2018)}.
 Fine-scale interactions between habitat quality and genetic variation suggest an impact of grazing on the critically endangered Crau Plain grasshopper (Pamphagidae: \emph{Prionotropis rhodanica}).
 \emph{Journal of Orthoptera Research} \bold{27}, 61–73.
-\href{https://doi.org/10.3897/jor.27.15036}{doi: 10.3897/jor.27.15036}}
-\item{Dellicour S, Prunier JG, Piry S, & al. \bold{(2019)}
+\doi{10.3897/jor.27.15036}}
+\item{Dellicour S, Prunier JG, Piry S, \& al. \bold{(2019)}
 Landscape genetic analyses of \emph{Cervus elaphus} and \emph{Sus scrofa}: comparative study and analytical developments.
 \emph{Heredity}.
-\href{https://doi.org/10.1038/s41437-019-0183-5}{doi: 10.1038/s41437-019-0183-5}}
+\doi{10.1038/s41437-019-0183-5}}
 }}
 }

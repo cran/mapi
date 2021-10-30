@@ -4,11 +4,19 @@
 \alias{MAPI_Plot}
 \title{Function MAPI_Plot}
 \usage{
-MAPI_Plot(resu, tails = NULL, samples = NULL, pal = c("#994000",
-  "#CC5800", "#FF8F33", "#FFAD66", "#FFCA99", "#FFE6CC", "#FBFBFB",
-  "#CCFDFF", "#99F8FF", "#66F0FF", "#33E4FF", "#00AACC", "#007A99"),
-  shades = 20, main = NA, upper = TRUE, lower = TRUE,
-  upper.border = "black", lower.border = "gray")
+MAPI_Plot(
+  resu,
+  tails = NULL,
+  samples = NULL,
+  pal = c("#994000", "#CC5800", "#FF8F33", "#FFAD66", "#FFCA99", "#FFE6CC", "#FBFBFB",
+    "#CCFDFF", "#99F8FF", "#66F0FF", "#33E4FF", "#00AACC", "#007A99"),
+  shades = 20,
+  main = NA,
+  upper = TRUE,
+  lower = TRUE,
+  upper.border = "black",
+  lower.border = "gray"
+)
 }
 \arguments{
 \item{resu}{A spatial object of class 'sf' resulting from a MAPI analysis done using

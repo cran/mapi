@@ -4,8 +4,11 @@
 \alias{MAPI_CheckData}
 \title{Function MAPI_CheckData}
 \usage{
-MAPI_CheckData(samples, metric, isMatrix = all((class(metric) ==
-  "matrix"), (nrow(metric) == ncol(metric))))
+MAPI_CheckData(
+  samples,
+  metric,
+  isMatrix = all((class(metric) == "matrix"), (nrow(metric) == ncol(metric)))
+)
 }
 \arguments{
 \item{samples}{a data.frame with names and geographical coordinates of samples. Column names must be: 'ind', 'x', 'y'.
