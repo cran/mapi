@@ -1,6 +1,9 @@
-# mapi 1.0.3
+# mapi 1.0.4
 
 * Added a `NEWS.md` file to track changes to the package.
+# mapi (version 1.0.4)
+## BUG FIX: The column 'permuts' generated some troubles when exporting results, it is now discarded from MAPI outputs.
+## DOCUMENTATION: The st_write examples for exporting results are updated.
 # mapi (version 1.0.3)
 ## BUG FIX: The number of ellipses (nb_ell) is corrected and exclude non-existent metric.
 # mapi (version 1.0.2)

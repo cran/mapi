@@ -42,7 +42,6 @@
 #' - swQ: percentile of the sum of weights \cr
 #' - geometry \cr
 #' When permutations are performed: \cr
-#' - permuts: list of the weighted mean values obtained from all permutations \cr
 #' - proba: proportion of the permuted weighted means below the observed weighted mean \cr
 #' - ltP: lower-tail p-value adjusted using the FDR procedure of Benjamini and Yekutieli \cr
 #' - utP: upper-tail p-value adjusted using the FDR procedure of Benjamini and Yekutieli \cr

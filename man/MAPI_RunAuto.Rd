@@ -75,7 +75,6 @@ a spatial object of class 'sf' providing for each cell: \cr
 \item swQ: percentile of the sum of weights \cr
 \item geometry \cr
 When permutations are performed: \cr
-\item permuts: list of the weighted mean values obtained from all permutations \cr
 \item proba: proportion of the permuted weighted means below the observed weighted mean \cr
 \item ltP: lower-tail p-value adjusted using the FDR procedure of Benjamini and Yekutieli \cr
 \item utP: upper-tail p-value adjusted using the FDR procedure of Benjamini and Yekutieli \cr

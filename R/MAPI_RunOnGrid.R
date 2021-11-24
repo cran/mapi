@@ -39,7 +39,6 @@
 #'  - swQ: percentile of the sum of weights \cr
 #'  - geometry \cr
 #'  When permutations are performed: \cr
-#'  - permuts: list of the weighted mean values obtained from all permutations \cr
 #'  - proba: proportion of the permuted weighted means below the observed weighted mean \cr
 #'  - ltP: lower-tail p-value adjusted using the FDR procedure of Benjamini and Yekutieli \cr
 #'  - utP: upper-tail p-value adjusted using the FDR procedure of Benjamini and Yekutieli \cr
@@ -316,6 +315,7 @@ MAPI_RunOnGrid <- function(samples, metric, grid, isMatrix=FALSE, ecc=0.975, err
 		##########################################################################################################################################################
 	})
 	tv <- as.vector(tot) ; tv[is.na(tv)] <- 0.0
+	resu$permuts <- NULL # discard permutations due to export problems
 	message(sprintf("MAPI COMPUTATION ENDED.  [TOTAL: user: %0.3f, system: %0.3f, elapsed: %0.3f seconds]", tv[1]+tv[4], tv[2]+tv[5], tv[3]))
 	return(resu)
 }

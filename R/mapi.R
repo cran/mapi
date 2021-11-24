@@ -144,16 +144,37 @@
 #' \subsection{Export results}{
 #' Output tables (weighted mean of the pairwise metric within cell and polygons delineating significant areas of (dis)continuity) are spatial objects built using the package \pkg{sf}. 
 #' Refer to \pkg{sf} documentation to export MAPI results in various format.
-#' Below is an example of how MAPI results can be exported as ESRI Shapefiles:\cr
+#' Below is an example of how MAPI results can be exported as ESRI Shapefiles:
 #' \preformatted{
 #' library(sf)
 #' # Export results for our test dataset
 #' st_write(my.results, dsn=".", layer="myFirstMapiResult", 
-#'    driver="ESRI Shapefile", update=TRUE, delete_layer=TRUE)
+#'    driver="ESRI Shapefile", append=FALSE, delete_layer=TRUE)
 #' st_write(my.tails, dsn=".", layer="myFirstMapiResultTails", 
-#'    driver="ESRI Shapefile", update=TRUE, delete_layer=TRUE)
+#'    driver="ESRI Shapefile", append=FALSE, delete_layer=TRUE)
 #' }
-#' You may now open these files \file{myFirstMapiResult.shp} and \file{myFirstMapiResultTails.shp} in a GIS software such as QGis and customize the layout.
+#'
+#' Alternatively, exporting layers in a geopackage is more convenient (only one file):
+#' \preformatted{
+#' library(sf)
+#' # Export results for our test dataset
+#' st_write(my.results, dsn="myFirstMapi.gpkg", layer="Result", 
+#'    driver="GPKG", append=FALSE, delete_layer=TRUE)
+#' st_write(my.tails, dsn="myFirstMapi.gpkg", layer="Tails", 
+#'    driver="GPKG", append=FALSE, delete_layer=TRUE)
+#' }
+#'
+#' You may now open these files \file{myFirstMapiResult.shp} and \file{myFirstMapiResultTails.shp} or \file{myFirstMapi.gpkg} in a GIS software such as QGis and customize the layout.\cr
+#' 
+#' NOTE: recent versions of sf/gdal packages does not allow to export the 'permuts' column. As it was never used, MAPI >=1.0.4 releases does not returns anymore this column.
+#' If you still use older MAPI versions, you can remove this column before exporting using the following command:
+#' \preformatted{
+#' my.results$permuts <- NULL
+#' }
+#' NOTE: If the area of significant zones is very large, the measure may not fit in Shapefiles fields. It is then possible to convert the area measure in km² by dividing the value by 1,000,000:
+#' \preformatted{
+#' my.tails$area <- as.numeric(my.tails$area) / 1e6
+#' }
 #' 
 #' Overlaying MAPI results with landscape layouts can help in analyzing the relationship between environmental features and spatial genetic patterns (eg. Piry & al., 2016; Piry & al., 2018).
 #' }
@@ -167,11 +188,11 @@
 #'   \doi{10.1111/2041-210X.12616}
 #' }
 #' \subsection{Applications of MAPI in Landscape Genetics}{\itemize{
-#'   \item{Larson S., Gagne RB \& al. \bold{2021}
+#'   \item{Larson S., Gagne RB et al. \bold{2021}
 #'   Translocations maintain genetic diversity and increase connectivity in sea otters, \emph{Enhydra lutris}
 #'   \emph{Marine Mammal Science}
 #'   \doi{10.1111/mms.12841}}
-#'   \item{Stragier C., Piry S., \& al. \bold{2020}.
+#'   \item{Stragier C., Piry S., et al. \bold{2020}.
 #'   Interplay between historical and current features of the cityscape in shaping the genetic structure of the house mouse (\emph{Mus musculus domesticus}) in Dakar (Senegal, West Africa)
 #'   \emph{bioRxiv ; Version 4 of this preprint has been peer-reviewed and is recommended by Peer Community In Ecology (DOI:10.24072/pci.ecology.100044)}
 #'   \doi{10.1101/557066}}
@@ -179,7 +200,7 @@
 #'   Fine-scale interactions between habitat quality and genetic variation suggest an impact of grazing on the critically endangered Crau Plain grasshopper (Pamphagidae: \emph{Prionotropis rhodanica}). 
 #'   \emph{Journal of Orthoptera Research} \bold{27}, 61–73.
 #'   \doi{10.3897/jor.27.15036}}
-#'   \item{Dellicour S, Prunier JG, Piry S, \& al. \bold{(2019)}
+#'   \item{Dellicour S, Prunier JG, Piry S, et al. \bold{(2019)}
 #'   Landscape genetic analyses of \emph{Cervus elaphus} and \emph{Sus scrofa}: comparative study and analytical developments. 
 #'   \emph{Heredity}.
 #'   \doi{10.1038/s41437-019-0183-5}}

@@ -13,8 +13,6 @@
 #'   This allows computation but, of course, has no geographical meaning.
 #' @param buf optional. This parameter allows to expand or shrink the grid by a number of units in 
 #'   the same reference system as the sample geographical coordinates (0 by default).
-#' @param shift boolean, use default FALSE value. DEPRECATED. 
-#'   This parameter has been added for the sake of compatibility with previous PostgreSQL MAPI extension.
 #' 
 #' @return a spatial object of class 'sf' including the x and y coordinates of cell centers, cell geometry (polygons) and cell id (gid).
 #' 
@@ -25,8 +23,9 @@
 #' grid <- MAPI_GridHexagonal(samples, crs=3857, hw=250)
 #' 
 
-MAPI_GridHexagonal <- function(samples, crs, hw, buf=0, shift=FALSE) {
+MAPI_GridHexagonal <- function(samples, crs, hw, buf=0) {
   message("Building grid...")
+  shift=FALSE # Deprecated option
   
   # Convert samples into spatial sf object
   samples2 <- sf::st_as_sf(samples, coords=c("x", "y"), crs=crs)
