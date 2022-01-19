@@ -1,6 +1,8 @@
-# mapi 1.0.4
+# mapi 1.0.5
 
 * Added a `NEWS.md` file to track changes to the package.
+# mapi (version 1.0.5)
+## BUG FIX: MAPI_CheckData does not lowercase colnames anymore as this avoided the use of an errRad column.
 # mapi (version 1.0.4)
 ## BUG FIX: The column 'permuts' generated some troubles when exporting results, it is now discarded from MAPI outputs.
 ## DOCUMENTATION: The st_write examples for exporting results are updated.
