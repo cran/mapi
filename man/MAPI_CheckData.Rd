@@ -7,7 +7,7 @@
 MAPI_CheckData(
   samples,
   metric,
-  isMatrix = all((class(metric) == "matrix"), (nrow(metric) == ncol(metric)))
+  isMatrix = all(("matrix" \%in\% class(metric)), (nrow(metric) == ncol(metric)))
 )
 }
 \arguments{

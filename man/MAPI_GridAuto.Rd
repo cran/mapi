@@ -8,8 +8,8 @@ MAPI_GridAuto(samples, crs, beta = 0.25, buf = 0)
 }
 \arguments{
 \item{samples}{a data.frame with names and geographical coordinates of samples. Column names must be: 'ind', 'x', 'y'.
-Optional column 'errRad' with an error radius for sample locations (eg. GPS uncertainty).
-Coordinates must be projected (not latitude/longitude).}
+If coordinates are angular (ie. latitude/longitude), note that x stands for the longitude and y for the latitude.
+Optional column 'errRad' with an error radius for sample locations (eg. GPS uncertainty).}
 
 \item{crs}{coordinate reference system: integer with the EPSG code, or character with proj4string.
 When using dummy coordinates (eg. simulation output) you may use EPSG:3857 (pseudo-Mercator) for example.
@@ -26,6 +26,12 @@ a spatial object of class 'sf' including the x and y coordinates of cell centers
 \description{
 Wrapper that computes cell halfwidth for a given beta value, and then
 builds a grid of hexagonal cells (call to \code{\link{MAPI_GridHexagonal}}).
+If coordinates are in angular units (eg. longitude/latitude) MAPI will try to build a worldwide
+"discrete global grid system" using package 'dggridR'.
+As the 'dggridR' package is no more available on CRAN, this feature have been removed
+and an error is thrown in this case.
+See \url{https://github.com/r-barnes/dggridR} for more informations.
+As an alternative, grids (levels 1 to 11) are downloadable from MAPI website.
 }
 \details{
 The halfwidth cell value used to build the grid is computed as
@@ -33,6 +39,8 @@ The halfwidth cell value used to build the grid is computed as
 where A is the study area (convex hull of sampling points) and N the number of samples.
 Parameter beta allows to respect the Nyquist-Shannon sampling theorem depending on sampling regularity
 (call to \code{\link{MAPI_EstimateHalfwidth}}).
+If coordinates are provided as longitude/latitude (eg. crs=4326) MAPI will try to build a worldwide grid.
+See \link{MAPI_EstimateHalfwidth} and \link{MAPI_GridHexagonal} for more information.
 }
 \examples{
 data("samples")

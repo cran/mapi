@@ -16,8 +16,8 @@ MAPI_RunAuto(
   nbPermuts = 0,
   dMin = 0,
   dMax = Inf,
-  nbCores = ifelse(requireNamespace("parallel", quietly = TRUE),
-    parallel::detectCores() - 1, 1),
+  nbCores = ifelse(requireNamespace("parallel", quietly = TRUE), parallel::detectCores()
+    - 1, 1),
   N = 8
 )
 }

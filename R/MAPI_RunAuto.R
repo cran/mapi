@@ -73,10 +73,10 @@
 #' 
 
 MAPI_RunAuto <- function(samples, metric, crs, isMatrix=all(class(metric)=="matrix", nrow(metric)==ncol(metric)), beta=0.25, ecc=0.975, buf=0, errRad=10, nbPermuts=0, dMin=0, dMax=Inf, nbCores=ifelse(requireNamespace("parallel", quietly=TRUE), parallel::detectCores()-1, 1), N=8) {
-	data <- MAPI_CheckData(samples, metric, isMatrix=isMatrix)
-	my.samples <- data[[1]]
-	my.metric <- data[[2]]
-	grid <- MAPI_GridAuto(samples=my.samples, crs=crs, beta=beta, buf=buf)
-	resu <- MAPI_RunOnGrid(samples=my.samples, metric=my.metric, grid=grid, ecc=ecc, errRad=errRad, nbPermuts=nbPermuts, dMin=dMin, dMax=dMax, nbCores=nbCores, N=N)
-	return(resu)
+    data <- MAPI_CheckData(samples, metric, isMatrix=isMatrix)
+    my.samples <- data[[1]]
+    my.metric <- data[[2]]
+    grid <- MAPI_GridAuto(samples=my.samples, crs=crs, beta=beta, buf=buf)
+    resu <- MAPI_RunOnGrid(samples=my.samples, metric=my.metric, grid=grid, ecc=ecc, errRad=errRad, nbPermuts=nbPermuts, dMin=dMin, dMax=dMax, nbCores=nbCores, N=N)
+    return(resu)
 }

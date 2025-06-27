@@ -42,68 +42,95 @@
 
 
 MAPI_Tails <- function(resu, minQ=0, alpha=0.05) {
-	
-	# check data availability
-	if (any(colnames(resu)=="ltP") || any(colnames(resu)=="utP")) {
-		message(sprintf("Significant areas aggregation, with percentile filter minQ > %d and alpha = %f ...", minQ, alpha))
-	} else {
-		stop("Error: no adjusted probabiblites for lower- and upper-tail columns (\"ltP\", \"utP\") found in results table provided.")
-	}
-	
-	# Check confidence level value
-	if (alpha < 0.0 || alpha > 0.5) {
-		stop(sprintf("Incorrect value for parameter alpha: %f (Range: [0, 0.5])", minQ))
-	}
-	
-	# Allow sum-of-weights percentile filtering
-	if (minQ > 0) {
-		my.resu <- resu[ resu$swQ > minQ , ]
-	} else if (minQ <= 100) {
-		my.resu <- resu
-	} else {
-		stop(sprintf("Incorrect value for parameter minQ: %d (Range: [0, 100])", minQ))
-	}
-	
-	# TODO: check for consistence between alpha and nbPermuts!
-	
-	# get upper tail
-	anyUpper <- any(c(my.resu$utP <= alpha, FALSE), na.rm=TRUE)
-	if (anyUpper) { 
-		tails.up.g <- sf::st_cast(sf::st_buffer(sf::st_union(my.resu$geometry[my.resu$utP <= alpha]), 0.0001), 'POLYGON')
-		tails.up <- data.frame(tail=rep("upper", length(tails.up.g)))
-		sf::st_geometry(tails.up) <- tails.up.g
-		tails.up$area <- sf::st_area(tails.up)
-	}
-	# get lower tail
-	anyLower <- any(c(my.resu$ltP <= alpha, FALSE), na.rm=TRUE)
-	if (anyLower) { 
-		tails.low.g <- sf::st_cast(sf::st_buffer(sf::st_union(my.resu$geometry[my.resu$ltP <= alpha]), 0.0001), 'POLYGON')
-		tails.low <- data.frame(tail=rep("lower", length(tails.low.g)))
-		sf::st_geometry(tails.low) <- tails.low.g
-		tails.low$area <- sf::st_area(tails.low)
-	}
-	# merge and returns tails (if any)
-	if (!anyUpper && !anyLower) { 
-		# geometries empty (ie. no tails)
-		tails <- sf::st_cast(sf::st_buffer(sf::st_union(my.resu$geometry[my.resu$utP <= alpha]), 0.0001), 'POLYGON') # returns an empty geometry
-		message("... no significant area")
-	} else if (anyUpper && anyLower) { 
-		# both geometries exists
-		tails <- rbind(tails.up, tails.low)
-		message(sprintf("... %d upper-tail and %d lower-tail significant areas returned", nrow(tails.up), nrow(tails.low)))
-	} else if (anyUpper) { 
-		# only upper tail exists
-		tails <- tails.up
-		message(sprintf("... %d upper-tail significant areas returned", nrow(tails.up)))
-	} else if (anyLower) { 
-		# only lower tail exists
-		tails <- tails.low
-		message(sprintf("... %d lower-tail significant areas returned", nrow(tails.low)))
-	}
-	# add an id if needed
-	if (anyUpper || anyLower) {
-		tails$id <- 1:nrow(tails)
-	}
-	return(tails)
+    # discard empty cells, if any
+    resu <- resu[!is.na(resu$avg_value) , ]
+    
+    # check data availability
+    if (any(colnames(resu)=="ltP") || any(colnames(resu)=="utP")) {
+        message(sprintf("Significant areas aggregation, with percentile filter minQ > %f and alpha = %f ...", minQ, alpha))
+    } else {
+        stop("Error: no adjusted probabiblites for lower- and upper-tail columns (\"ltP\", \"utP\") found in results table provided.")
+    }
+    
+    # Check confidence level value
+    if (alpha < 0.0 || alpha > 0.5) {
+        stop(sprintf("Incorrect value for parameter alpha: %f (Range: [0, 0.5])", minQ))
+    }
+    
+    # Allow sum-of-weights percentile filtering
+    if (minQ > 0) {
+        my.resu <- resu[ resu$swQ > minQ , ]
+    } else if (minQ <= 100) {
+        my.resu <- resu
+    } else {
+        stop(sprintf("Incorrect value for parameter minQ: %f (Range: [0, 100])", minQ))
+    }
+    
+    # TODO: check for consistence between alpha and nbPermuts!
+    
+    if (sf::st_is_longlat(my.resu)) {
+        # We need to reconsider default snap distance, otherwise holes appear in merged polygons.
+        # This is an alternative to the small buffer used in planar grids.
+        # Let's estimate snap as small fraction of average cell radius
+        snap.dist <- mean(sqrt(s2::s2_area(sf::st_geometry(my.resu)) /pi)) * 1e-5
+        # IMPORTANT! Convert to radians
+        snap.dist <- snap.dist / s2::s2_earth_radius_meters()
+    }
+    
+    # get upper tail
+    anyUpper <- any(c(my.resu$utP <= alpha, FALSE), na.rm=TRUE)
+    if (anyUpper) {
+        if (sf::st_is_longlat(my.resu)) {
+            tails.up.g <- s2::s2_union_agg(sf::st_geometry(my.resu[my.resu$utP <= alpha, ]), options=s2::s2_options(model='closed', snap=s2::s2_snap_distance(snap.dist)))
+            tails.up <- data.frame(tail=rep("upper", length(tails.up.g)))
+            tails.up$area <- s2::s2_area(tails.up.g)
+            tails.up$geometry <- tails.up.g
+            tails.up <- sf::st_as_sf(tails.up, sf_column_name="geometry")
+        } else {
+            tails.up.g <- sf::st_cast(sf::st_buffer(sf::st_union(my.resu$geometry[my.resu$utP <= alpha]), 0.0001), 'POLYGON')
+            tails.up <- data.frame(tail=rep("upper", length(tails.up.g)))
+            sf::st_geometry(tails.up) <- tails.up.g
+            tails.up$area <- sf::st_area(tails.up)
+        }
+    }
+    # get lower tail
+    anyLower <- any(c(my.resu$ltP <= alpha, FALSE), na.rm=TRUE)
+    if (anyLower) {
+        if (sf::st_is_longlat(my.resu)) {
+            tails.low.g <- s2::s2_union_agg(sf::st_geometry(my.resu[my.resu$ltP <= alpha, ]), options=s2::s2_options(model='closed', snap=s2::s2_snap_distance(snap.dist)))
+            tails.low <- data.frame(tail=rep("lower", length(tails.low.g)))
+            tails.low$area <- s2::s2_area(tails.low.g)
+            tails.low$geometry <- tails.low.g
+            tails.low <- sf::st_as_sf(tails.low, sf_column_name="geometry")
+        } else {
+            tails.low.g <- sf::st_cast(sf::st_buffer(sf::st_union(my.resu$geometry[my.resu$ltP <= alpha]), 0.0001), 'POLYGON')
+            tails.low <- data.frame(tail=rep("lower", length(tails.low.g)))
+            sf::st_geometry(tails.low) <- tails.low.g
+            tails.low$area <- sf::st_area(tails.low)
+        }
+    }
+    # merge and returns tails (if any)
+    if (!anyUpper && !anyLower) { 
+        # geometries empty (ie. no tails)
+        tails <- sf::st_cast(sf::st_buffer(sf::st_union(my.resu$geometry[my.resu$utP <= alpha]), 0.0001), 'POLYGON') # returns an empty geometry
+        message("... no significant area")
+    } else if (anyUpper && anyLower) { 
+        # both geometries exists
+        tails <- rbind(tails.up, tails.low)
+        message(sprintf("... %d upper-tail and %d lower-tail significant areas returned", nrow(tails.up), nrow(tails.low)))
+    } else if (anyUpper) { 
+        # only upper tail exists
+        tails <- tails.up
+        message(sprintf("... %d upper-tail significant areas returned", nrow(tails.up)))
+    } else if (anyLower) { 
+        # only lower tail exists
+        tails <- tails.low
+        message(sprintf("... %d lower-tail significant areas returned", nrow(tails.low)))
+    }
+    # add an id if needed
+    if (anyUpper || anyLower) {
+        tails$id <- 1:nrow(tails)
+    }
+    return(tails)
 }
 

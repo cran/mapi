@@ -14,15 +14,19 @@ MAPI_RunOnGrid(
   nbPermuts = 0,
   dMin = 0,
   dMax = Inf,
-  nbCores = ifelse(base::requireNamespace("parallel", quietly = TRUE),
-    parallel::detectCores() - 1, 1),
-  N = 8
+  use_s2 = FALSE,
+  nbCores = parallel::detectCores() - 1,
+  N = 8,
+  ignore.weights = FALSE
 )
 }
 \arguments{
 \item{samples}{a data.frame with names and geographical coordinates of samples.
-Column names must be: 'ind', 'x', 'y'.  Optional column 'errRad' with an error radius for sample locations (eg. GPS uncertainty).
-Coordinates must be projected (not latitude/longitude).}
+Column names must be: 'ind', 'x', 'y'.  Optional column 'errRad' with an error radius
+for sample locations (eg. GPS uncertainty).
+Coordinates should be projected (not latitude/longitude) for a local dataset, angular coordinates
+(ie. latitude/longitude) are accepted for worldwide datasets.
+In this case, the longitude will be in the "x" column and the latitude in the "y" column.}
 
 \item{metric}{a data.frame or a square matrix with the pairwise metric computed for all pairs of samples.
 If data.frame, column names must be: 'ind1', 'ind2', 'value'.
@@ -49,12 +53,18 @@ To use different error radius values for sample locations, add a column 'errRad'
 
 \item{dMax}{maximal distance between individuals. +Inf by default.}
 
+\item{use_s2}{transform grid and coordinates in latitude,longitude in order to use s2 library functions (default FALSE).
+When set to TRUE mapi is able to process worldwide grids and ellipses and generate results on the sphere.}
+
 \item{nbCores}{number of CPU cores you want to use during parallel computation.
 The default value is estimated as the number of available cores minus 1, suitable for a personal computer.
 On a cluster you might have to set it to a reasonable value (eg. 8) in order to keep resources for other tasks.}
 
 \item{N}{number of points used per quarter of ellipse, 8 by default.
 Don't change it unless you really know what you are doing.}
+
+\item{ignore.weights}{allow to compute a simple mean instead of the default weighted mean.
+This implies that all ellipses bear the same weight.}
 }
 \value{
 a spatial object of class 'sf' providing for each cell: \cr
@@ -98,8 +108,7 @@ my.grid <- MAPI_GridHexagonal(samples, crs=3857, 500) # 500m halfwidth
 my.results <- MAPI_RunOnGrid(samples, metric, grid=my.grid, nbPermuts=10, nbCores=1)
 
 # eg. Export results to shapefile "myFirstMapiResult" in current directory
-library(sf)
-st_write(my.results, dsn=".", layer="myFirstMapiResult", driver="ESRI Shapefile")
+sf::st_write(my.results, dsn=".", layer="myFirstMapiResult", driver="ESRI Shapefile")
 }
 
 }

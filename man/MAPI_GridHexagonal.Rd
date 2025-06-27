@@ -8,8 +8,7 @@ MAPI_GridHexagonal(samples, crs, hw, buf = 0)
 }
 \arguments{
 \item{samples}{a data.frame with names and geographical coordinates of samples. Column names must be: 'ind', 'x', 'y'.
-Optional column 'errRad' with an error radius for sample locations (eg. GPS uncertainty).
-Coordinates must be projected (not latitude/longitude).}
+Optional column 'errRad' with an error radius for sample locations (eg. GPS uncertainty).}
 
 \item{crs}{coordinate reference system: integer with the EPSG code, or character with proj4string.
 When using dummy coordinates (eg. simulation output) you may use EPSG:3857 for example.
@@ -18,14 +17,22 @@ This allows computation but, of course, has no geographical meaning.}
 \item{hw}{Halfwidth : side length of hexagonal cells.}
 
 \item{buf}{optional. This parameter allows to expand or shrink the grid by a number of units in
-the same reference system as the sample geographical coordinates (0 by default).}
+the same reference system as the sample geographical coordinates (0 by default, ignored for
+worldwide grids).}
 }
 \value{
-a spatial object of class 'sf' including the x and y coordinates of cell centers, cell geometry (polygons) and cell id (gid).
+a spatial object of class 'sf' including the x and y coordinates of cell centers,
+cell geometry (polygons) and cell id (gid).
 }
 \description{
 Build a grid of hexagonal cells according to samples coordinates and a given halfwidth
 cell value provided by users (can be computed using \code{\link{MAPI_EstimateHalfwidth}}).
+If coordinates are in angular units (eg. longitude/latitude) MAPI will try to build a worldwide
+"discrete global grid system" using package 'dggridR'.
+As the 'dggridR' package is no more available on CRAN, this feature have been removed
+and an error is thrown in this case.
+See \url{https://github.com/r-barnes/dggridR} for more informations.
+As an alternative, grids (levels 1 to 11) are downloadable from MAPI website.
 }
 \examples{
 data("samples")

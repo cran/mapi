@@ -18,19 +18,35 @@
 #' @examples
 #' data(samples)
 #' # Computes hexagonal cell halfwidth for the 'samples' dataset using beta=0.5
-#' hw <- MAPI_EstimateHalfwidth(samples, beta=0.5)
+#' hw <- MAPI_EstimateHalfwidth(samples, crs=3857, beta=0.5)
 #'
 #' @references
 #' Hengl, T. (2006) Finding the right pixel size. Computers & Geosciences, 32, 1283--1298.
 #' 
 
 MAPI_EstimateHalfwidth <- function(samples, crs, beta=0.25) {
-  samples2 <- sf::st_as_sf(samples, coords=c("x", "y"), crs=crs)
-  A <- sf::st_area(sf::st_convex_hull(sf::st_union(samples2$geometry)))
-  A <- as.double(A)
-  N <- nrow(samples)
-  p <- beta*sqrt(A/N)
-  hw <- p/sqrt(2.5980) # 2.598076211 but rounded for compatibility with previous SQL version
-  message(sprintf("Estimated halfwidth: %f", hw))
-  return(hw)
+    my.crs <- sf::st_crs(crs)
+    samples2 <- sf::st_as_sf(samples, coords=c("x", "y"), crs=my.crs)
+    if (sf::st_is_longlat(samples2)) {
+        message("NOTE: coordinates are in angular units, note that x stands for longitude and y for latitude.")
+        my.ch <- s2::s2_convex_hull_agg(sf::st_as_s2(samples2$geometry))
+        # whether convex hull exists or not...
+        if (s2::s2_is_empty(my.ch)) {
+            # return earth area
+            # Classical calculation : A <- 4 * pi * s2::s2_earth_radius_meters() * s2::s2_earth_radius_meters()
+            # S2 calculation should be (and actually is) the same! :-D
+            A <- s2::s2_area(s2::as_s2_geography(TRUE))
+        } else {
+            # return area of the convex hull
+            A <- s2::s2_area(my.ch)
+        }
+    } else {
+        A <- sf::st_area(sf::st_convex_hull(sf::st_union(samples2$geometry)))
+    }
+    A <- as.double(A)
+    N <- nrow(samples)
+    p <- beta*sqrt(A/N)
+    hw <- p/sqrt(2.5980) # NOTE: Should be 2.598076211 but rounded for compatibility with old SQL version
+    message(sprintf("Estimated halfwidth: %f", hw))
+    return(hw)
 }

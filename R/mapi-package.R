@@ -1,16 +1,7 @@
+"_PACKAGE"
 #' @title MAPI, general presentation
 #' @name mapi
 #' @aliases mapi-package
-#' @import data.table
-#' @import sf
-#' @import stats
-#' @import parallel
-#' @import pbapply
-## usethis namespace: start
-#' @useDynLib mapi
-#' @importFrom Rcpp sourceCpp
-## usethis namespace: end
-#' @docType package
 #' 
 #' @description 
 #' MAPI is an exploratory method providing graphical representations of the spatial variation of 
@@ -144,39 +135,19 @@
 #' \subsection{Export results}{
 #' Output tables (weighted mean of the pairwise metric within cell and polygons delineating significant areas of (dis)continuity) are spatial objects built using the package \pkg{sf}. 
 #' Refer to \pkg{sf} documentation to export MAPI results in various format.
-#' Below is an example of how MAPI results can be exported as ESRI Shapefiles:
+#' Below is an example of how MAPI results can be exported as ESRI Shapefiles:\cr
 #' \preformatted{
 #' library(sf)
 #' # Export results for our test dataset
 #' st_write(my.results, dsn=".", layer="myFirstMapiResult", 
-#'    driver="ESRI Shapefile", append=FALSE, delete_layer=TRUE)
+#'    driver="ESRI Shapefile", update=TRUE, delete_layer=TRUE)
 #' st_write(my.tails, dsn=".", layer="myFirstMapiResultTails", 
-#'    driver="ESRI Shapefile", append=FALSE, delete_layer=TRUE)
+#'    driver="ESRI Shapefile", update=TRUE, delete_layer=TRUE)
 #' }
-#'
-#' Alternatively, exporting layers in a geopackage is more convenient (only one file):
-#' \preformatted{
-#' library(sf)
-#' # Export results for our test dataset
-#' st_write(my.results, dsn="myFirstMapi.gpkg", layer="Result", 
-#'    driver="GPKG", append=FALSE, delete_layer=TRUE)
-#' st_write(my.tails, dsn="myFirstMapi.gpkg", layer="Tails", 
-#'    driver="GPKG", append=FALSE, delete_layer=TRUE)
-#' }
-#'
-#' You may now open these files \file{myFirstMapiResult.shp} and \file{myFirstMapiResultTails.shp} or \file{myFirstMapi.gpkg} in a GIS software such as QGis and customize the layout.\cr
+#' You may now open these files \file{myFirstMapiResult.shp} and \file{myFirstMapiResultTails.shp} in a GIS software such as QGis and customize the layout.
 #' 
-#' NOTE: recent versions of sf/gdal packages does not allow to export the 'permuts' column. As it was never used, MAPI >=1.0.4 releases does not returns anymore this column.
-#' If you still use older MAPI versions, you can remove this column before exporting using the following command:
-#' \preformatted{
-#' my.results$permuts <- NULL
-#' }
-#' NOTE: If the area of significant zones is very large, the measure may not fit in Shapefiles fields. It is then possible to convert the area measure in km² by dividing the value by 1,000,000:
-#' \preformatted{
-#' my.tails$area <- as.numeric(my.tails$area) / 1e6
-#' }
-#' 
-#' Overlaying MAPI results with landscape layouts can help in analyzing the relationship between environmental features and spatial genetic patterns (eg. Piry & al., 2016; Piry & al., 2018).
+#' Overlaying MAPI results with landscape layouts can help in analyzing the relationship between environmental features and spatial genetic patterns
+#' (eg. Piry et al., 2016; Piry et al., 2018).
 #' }
 #' 
 #' 
@@ -207,5 +178,3 @@
 #' }}
 #'
 NULL
-
-

@@ -76,6 +76,22 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// trilaterate_cpp
+Rcpp::DoubleVector trilaterate_cpp(double p0lon, double p0lat, double p1lon, double p1lat, double gc0, double gc1);
+RcppExport SEXP _mapi_trilaterate_cpp(SEXP p0lonSEXP, SEXP p0latSEXP, SEXP p1lonSEXP, SEXP p1latSEXP, SEXP gc0SEXP, SEXP gc1SEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< double >::type p0lon(p0lonSEXP);
+    Rcpp::traits::input_parameter< double >::type p0lat(p0latSEXP);
+    Rcpp::traits::input_parameter< double >::type p1lon(p1lonSEXP);
+    Rcpp::traits::input_parameter< double >::type p1lat(p1latSEXP);
+    Rcpp::traits::input_parameter< double >::type gc0(gc0SEXP);
+    Rcpp::traits::input_parameter< double >::type gc1(gc1SEXP);
+    rcpp_result_gen = Rcpp::wrap(trilaterate_cpp(p0lon, p0lat, p1lon, p1lat, gc0, gc1));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_mapi_countMatches_cpp", (DL_FUNC) &_mapi_countMatches_cpp, 1},
@@ -83,6 +99,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_mapi_parseInter_cpp", (DL_FUNC) &_mapi_parseInter_cpp, 4},
     {"_mapi_parseInterPerm_cpp", (DL_FUNC) &_mapi_parseInterPerm_cpp, 4},
     {"_mapi_mkP4st_cpp", (DL_FUNC) &_mapi_mkP4st_cpp, 3},
+    {"_mapi_trilaterate_cpp", (DL_FUNC) &_mapi_trilaterate_cpp, 6},
     {NULL, NULL, 0}
 };
 

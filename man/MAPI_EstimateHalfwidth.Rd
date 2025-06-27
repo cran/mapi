@@ -29,7 +29,7 @@ Parameter beta allows to respect the Nyquist-Shannon sampling theorem depending 
 \examples{
 data(samples)
 # Computes hexagonal cell halfwidth for the 'samples' dataset using beta=0.5
-hw <- MAPI_EstimateHalfwidth(samples, beta=0.5)
+hw <- MAPI_EstimateHalfwidth(samples, crs=3857, beta=0.5)
 
 }
 \references{

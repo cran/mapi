@@ -4,6 +4,13 @@
 #include <vector>
 #include <math.h>
 
+#if defined(__GNUC__)
+#  pragma GCC optimize ("O3")
+#endif
+
+// See: s2-earth.R for using same earth radius
+#define EARTHRADIUS 6371010.0L
+
 /*
 NOTE: "using namespace" are commented out and replaced by the syntax namespace::object in order to avoid ambiguities between std and Rcpp.
 WARNING: DO NOT UNCOMMENT!
@@ -12,44 +19,55 @@ using namespace Rcpp;
 */
 
 
-// //' Function countMatches_cpp
+//' @noRd
+// //' Number of intersections between ellipses and grid cells
 // //' 
-// //' From the list of integer vectors which reprresents the intersection of grid cells and ellipses, this function counts the total number of matches (items) in this list of vectors.
+// //' From the list of integer vectors which represents the intersection of grid cells and ellipses, this function counts the total number of matches (items) in this list of vectors.
 // //'
 // //' @param inter A list of integer vector containing intersections between cells and ellipses
 // //' @return the total number of items (sum of lengths of all vectors in the list).
-// [[Rcpp::export]]
+// [[Rcpp::export(.countMatches_cpp)]]
 long countMatches_cpp(Rcpp::List inter) {
-  int n = inter.size();
+  unsigned int n = inter.size();
   long resu = 0L;
   //Rcout << "n=" << n << "\n";
-  for (int i=0; i<n; i++) {
+  for (unsigned int i=0; i<n; i++) {
     Rcpp::List ells = inter(i);
     long ne = ells.size();
-	resu += ne;
+    resu += ne;
   }
   return(resu);
 }
 
-// [[Rcpp::export]]
+//' @noRd
+// //' Retrieve weight and values for each cell from overlapping ellipses
+// //'
+// //' From the list of intersections, cells and ellipses' features, build the list of (value,weight) pairs for each cell
+// //'
+// //' @param cells the vector of cell
+// //' @param inter the vector of intersections cell,ellipses
+// //' @param weights the vector of ellipses weights
+// //' @param values the vector of ellipses values
+// //' @return a list of results by cell which contains lists of (value,weight) pairs 
+// [[Rcpp::export(.getValues_cpp)]]
 Rcpp::List getValues_cpp(Rcpp::NumericVector cells, Rcpp::List inter, Rcpp::DoubleVector weights, Rcpp::DoubleVector values) {
-  int n = inter.size();
+  unsigned int n = inter.size();
   Rcpp::List resu(0);
-  for (int i=0; i<n; i++) {
+  for (unsigned int i=0; i<n; i++) {
     Rcpp::List ells = inter(i);
-    int ne = ells.size();
+    unsigned int ne = ells.size();
     if (ne == 0) {
         Rcpp::NumericMatrix elem(0,0);
         resu.push_back(elem);
     } else {
       Rcpp::NumericMatrix elem(ne,2);
-      for (int j=0; j<ne; j++) {
+      for (unsigned int j=0; j<ne; j++) {
         int ie = int(ells[j]) - 1;
         if (ie < weights.size()) {
           double w = weights(ie);
           double v = values(ie);
-	  elem(j, 0) = v;
-	  elem(j, 1) = w;
+          elem(j, 0) = v;
+          elem(j, 1) = w;
         } else {
           Rcpp::Rcout << "overflow: ie="<<ie<<"\n";
           break;
@@ -61,39 +79,37 @@ Rcpp::List getValues_cpp(Rcpp::NumericVector cells, Rcpp::List inter, Rcpp::Doub
   return(resu);
 }
 
-// //' Function parseInter_cpp
+//' @noRd
+// //' Intersection summary for each grid cell
 // //' 
-// //' From the list of integer vectors which represents the intersection of grid cells and ellipses, this function returns a numeric matrix with one row per grid cell and five columns : cell gid, the number of intersecting ellipses, the weighted-averaged value of intesecting ellipses values, the sum of intersecting ellipses weights and the weighted standard deviation of intesecting ellipses values.
+// //' From the list of integer vectors which represents the intersection of grid cells and ellipses, this function returns a numeric matrix with one row per grid cell and five columns : cell gid, the number of intersecting ellipses, the weighted-averaged value of overlapping ellipses values, the sum of intersecting ellipses weights and the weighted standard deviation of overlapping ellipses values.
 // //'
 // //' @param cells An integer vector containing cells ids
 // //' @param inter A list of integer vector containing intersections between cells and ellipses
 // //' @param weights A double-precision vector containing weights of the ellipses
 // //' @param values A double-precision vector containing values of the ellipses
-// //' @return a numeric matrix with one row per grid cell and five columns : cell gid, the number of intersecting ellipses, the weighted-averaged value of intesecting ellipses values, the sum of intersecting ellipses weights and the weighted standard deviation of intesecting ellipses values.
-// [[Rcpp::export]]
+// //' @return a numeric matrix with one row per grid cell and five columns : cell gid, the number of intersecting ellipses, the weighted-averaged value of overlapping ellipses values, the sum of intersecting ellipses weights and the weighted standard deviation of overlapping ellipses values.
+// [[Rcpp::export(.parseInter_cpp)]]
 Rcpp::NumericMatrix parseInter_cpp(Rcpp::NumericVector cells, Rcpp::List inter, Rcpp::DoubleVector weights, Rcpp::DoubleVector values) {
-  int n = inter.size();
+  unsigned int n = inter.size();
   Rcpp::NumericMatrix resu(n,5);
-  //Rcout << "n=" << n << "\n";
-  for (int i=0; i<n; i++) {
+  for (unsigned int i=0; i<n; i++) {
     int gid = cells(i);
     Rcpp::List ells = inter(i);
-    int ne = ells.size();
-    //Rcpp::Rcout << "i="<< i << "\t gid=" << gid << "\t ne=" << ne << "\n";
+    unsigned int ne = ells.size();
     if (ne == 0) {
       resu(i,0) = gid;
       resu(i,1) = 0;
+      resu(i,1) = NA_REAL;
       resu(i,2) = NA_REAL;
       resu(i,3) = NA_REAL;
       resu(i,4) = NA_REAL;
-      //cout << i << "<-NA\n";
     } else {
       // Weighted mean
       double valuesSum = 0.0;
       double weightsSum = 0.0;
       double squareSum = 0.0;
-      int nbEll = 0;
-      for (int j=0; j<ne; j++) {
+      for (unsigned int j=0; j<ne; j++) {
         int ie = int(ells[j]) - 1;
         if (ie < weights.size()) {
           double w = weights(ie);
@@ -102,7 +118,6 @@ Rcpp::NumericMatrix parseInter_cpp(Rcpp::NumericVector cells, Rcpp::List inter, 
             valuesSum  += w * v;
             squareSum  += w * pow(v, 2);
             weightsSum += w;
-            nbEll ++;
           }
         } else {
           Rcpp::Rcout << "overflow: ie="<<ie<<"\n";
@@ -112,37 +127,35 @@ Rcpp::NumericMatrix parseInter_cpp(Rcpp::NumericVector cells, Rcpp::List inter, 
       double avg = valuesSum / weightsSum;
       double var = (squareSum / weightsSum) - pow(avg,2) ;
       double stdv = sqrt(var);
-      //Rcpp::Rcout << gid<<"\t"<<avg<<"\t"<<weightsSum<<"\t"<<ne<<"\n";
       resu(i,0) = gid;
-      resu(i,1) = nbEll;
+      resu(i,1) = ne;
       resu(i,2) = avg;
       resu(i,3) = weightsSum;
       resu(i,4) = stdv;
     }
   }
-  //Rcpp::Rcout << "\n Fonction optimisée avec Konig-Huygens : stdv = " << resu(1,4)<<"\n";
   return(resu);
 }
 
 
 
-// //' Function parseInterPerm_cpp
+//' @noRd
+// //' Intersection summary for each grid cell used in permutation context
 // //' 
-// //' From the list of integer vectors which reprresents the intersection of grid cells and ellipses, this function returns a numeric vector containing the weighted-averaged value of intesecting ellipses values.
+// //' From the list of integer vectors which represents the intersection of grid cells and ellipses, this function returns a numeric vector containing the weighted-averaged value of overlapping ellipses values.
 // //'
 // //' @param cells An integer vector containing cells ids
 // //' @param inter A list of integer vector containing intersections between cells and ellipses
 // //' @param weights A numeric vector containing weights of the ellipses
 // //' @param values A numeric vector containing values of the ellipses
-// //' @return a numeric vector with the weighted-averaged value of intesecting ellipses values.
-// [[Rcpp::export]]
+// //' @return a numeric vector with the weighted-averaged value of overlapping ellipses values.
+// [[Rcpp::export(.parseInterPerm_cpp)]]
 Rcpp::DoubleVector parseInterPerm_cpp(Rcpp::NumericVector cells, Rcpp::List inter, Rcpp::DoubleVector weights, Rcpp::DoubleVector values) {
-  int n = inter.size();
+  unsigned int n = inter.size();
   Rcpp::DoubleVector resu(n);
-  //Rcout << "n=" << n << "\n";
-  for (int i=0; i<n; i++) {
+  for (unsigned int i=0; i<n; i++) {
     Rcpp::List ells = inter(i);
-    int ne = ells.size();
+    unsigned int ne = ells.size();
     //Rcout << "i="<< i << "\t gid=" << gid << "\t ne=" << ne << "\n";
     if (ne == 0) {
       resu(i) = NA_REAL;
@@ -151,7 +164,7 @@ Rcpp::DoubleVector parseInterPerm_cpp(Rcpp::NumericVector cells, Rcpp::List inte
       // Weighted mean
       double valuesSum = 0.0;
       double weightsSum = 0.0;
-      for (int j=0; j<ne; j++) {
+      for (unsigned int j=0; j<ne; j++) {
         int ie = int(ells[j]) - 1;
         if (ie < weights.size()) {
           double w = weights(ie);
@@ -173,8 +186,8 @@ Rcpp::DoubleVector parseInterPerm_cpp(Rcpp::NumericVector cells, Rcpp::List inte
 
 // Function for sorting Rcomplex as if CPoint in original source
 bool RcomplexSorter (Rcomplex i, Rcomplex j) { 
-	//return (i.r < j.r || i.r == j.r && i.i < j.i);
-	return ( (i.r < j.r) || ((i.r == j.r) && (i.i < j.i)) );
+    //return (i.r < j.r || i.r == j.r && i.i < j.i);
+    return ( (i.r < j.r) || ((i.r == j.r) && (i.i < j.i)) );
 }
 // 2D cross product of OA and OB vectors, i.e. z-component of their 3D cross product.
 // Returns a positive value, if OAB makes a counter-clockwise turn,
@@ -192,12 +205,13 @@ double c_cross(const Rcomplex &O, const Rcomplex &A, const Rcomplex &B) { return
 // //' 
 // //' @references https://en.wikibooks.org/wiki/Algorithm_Implementation/Geometry/Convex_hull/Monotone_chain#C++
 // //' 
-// //' @param P complex vector, the point coordiantes
+// //' @param P complex vector, the centroids coordinates
 // //'
 // //' @return a complex vector as coordinates of summits of the convex hull in counter-clockwise order.
 // //'
 std::vector<Rcomplex> convex_hull(Rcpp::ComplexVector P) {
-  int n = P.size(), k = 0;
+  unsigned int n = P.size();
+  int k = 0;
   if (n == 1) {
     std::vector<Rcomplex> H(1);
     H[0] = P[0];
@@ -207,7 +221,7 @@ std::vector<Rcomplex> convex_hull(Rcpp::ComplexVector P) {
     // Sort points lexicographically
     std::sort(P.begin(), P.end(), RcomplexSorter);
     // Build lower hull
-    for (int i = 0; i < n; ++i) {
+    for (unsigned int i = 0; i < n; ++i) {
       while (k >= 2 && c_cross(H[k-2], H[k-1], P[i]) <= 0) k--;
       H[k++] = P[i];
     }
@@ -311,18 +325,20 @@ Rcpp::ComplexVector mkEc_cpp(double a, double b, Rcomplex c0, Rcomplex rot, Rcpp
   return(r);
 }
 
-// //' Function mkP4st_cpp
+//' @noRd
+// //' Ellipse-like polygon construction
 // //' 
 // //' Builds the convex hull of the ellipse joining two spatial points and their error circles
 // //'
 // //' @param r An numeric vector containing x1, y1, x2, y2, e1, e2 respectively the coordinates x,y and the error circle radius of point 1 (2).
 // //' @param N The number of segments per quarter-circle
 // //' @param ecc The eccentricity of the ellipse
-// //' @return a numeric matrix of coordinates (x,y) in colums with one row per point of the convex hull
-// [[Rcpp::export]]
+// //' @return a numeric matrix of coordinates (x,y) in columns with one row per point of the convex hull
+// //'
+// [[Rcpp::export(.mkP4st_cpp)]]
 Rcpp::NumericMatrix mkP4st_cpp(Rcpp::DoubleVector r, Rcpp::IntegerVector N, Rcpp::DoubleVector ecc) {
   int ic = 0;
-  // 	int id = r[ic++];
+  //     int id = r[ic++];
   double x1 = r[ic++];
   double y1 = r[ic++];
   double x2 = r[ic++];
@@ -392,4 +408,183 @@ Rcpp::NumericMatrix mkP4st_cpp(Rcpp::DoubleVector r, Rcpp::IntegerVector N, Rcpp
       return(resu);
     }
   }
+}
+
+
+// converts longitude,latitude to x,y,z in euclidean space on earth
+std::vector<double> to_xyz_cpp(double lon1, double lat1) {
+    std::vector<double> xyz(3);
+    double lon = lon1 * M_PI / 180.0L;
+    double lat = lat1 * M_PI / 180.0L;
+    xyz[0] = EARTHRADIUS * cos(lat) * cos(lon);
+    xyz[1] = EARTHRADIUS * cos(lat) * sin(lon);
+    xyz[2] = EARTHRADIUS * sin(lat);
+    return(xyz);
+}
+
+// converts x,y,z in euclidean space on earth to longitude,latitude
+std::vector<double> from_xyz_cpp(double x, double y, double z) {
+    std::vector<double> lonlat(2);
+    lonlat[0] = 180.0L * atan2(y, x) / M_PI;
+    lonlat[1] = 180.0L * asin(z / EARTHRADIUS) / M_PI;
+    return(lonlat);
+}
+
+// computes the chord distance given a great circle distance on earth
+double greatCircle2chord_cpp(double gc) {
+    double d = 2.0L * EARTHRADIUS * sin(0.5L * gc / EARTHRADIUS);
+    return(d);
+}
+
+// computes a great circle distance given a chord distance on earth
+double chord2greatCircle_cpp(double c) {
+    double alpha = asin(0.5L * c / EARTHRADIUS);
+    return(2.0L * alpha * EARTHRADIUS);
+}
+
+// Summation of values with possibly huge differences
+// See: https://en.wikipedia.org/wiki/Kahan_summation_algorithm
+
+// Prevents over-optimization for next functions
+#if defined(__GNUC__)
+#  pragma GCC push_options
+#  pragma GCC optimize ("O2")
+#endif
+
+// euclidean norm of a vector
+double l2_norm_cpp(std::vector<double> const& u) {
+    std::vector<double> v;
+    for (unsigned int i = 0; i < u.size(); ++i)
+        v.push_back(u[i]*u[i]);
+    // Kahan's summation
+    double accum = 0.0L;
+    double c = 0.0L;
+    for (unsigned int i = 0; i < v.size(); ++i) {
+        volatile double y = v[i] - c;
+        volatile double t = accum + y;
+        volatile double z = t - accum;
+        c = z - y;
+        accum = t;
+    }
+    return(sqrt(accum));
+}
+
+// inner product of two vectors (of same length)
+double in_prod_cpp(std::vector<double> const& u1, std::vector<double> const& u2) {
+    if (u1.size() != u2.size())
+        throw std::invalid_argument( "Vectors have different size" );
+    std::vector<double> v;
+    for (unsigned int i = 0; i < u1.size(); ++i)
+        v.push_back(u1[i]*u2[i]);
+    // Kahan's summation
+    double accum = 0.0L;
+    double c = 0.0L;
+    for (unsigned int i = 0; i < v.size(); ++i) {
+        volatile double y = v[i] - c;
+        volatile double t = accum + y;
+        volatile double z = t - accum;
+        c = z - y;
+        accum = t;
+    }
+    return(accum);
+}
+
+// restore default compilation options
+#if defined(__GNUC__)
+#  pragma GCC pop_options
+#endif
+
+// cross product of two vectors of length 3
+// From: https://www.tutorialspoint.com/cplusplus-program-to-compute-cross-product-of-two-vectors
+std::vector<double> cross_product_3_cpp(std::vector<double> v_A, std::vector<double> v_B) {
+   std::vector<double> c_P(3);
+   c_P[0] = v_A[1] * v_B[2] - v_A[2] * v_B[1];
+   c_P[1] = -(v_A[0] * v_B[2] - v_A[2] * v_B[0]);
+   c_P[2] = v_A[0] * v_B[1] - v_A[1] * v_B[0];
+   return(c_P);
+}
+
+
+//' @noRd
+// //' Trilaterarion of three spheres; from original python code, see: 
+// //' https://stackoverflow.com/questions/1406375/finding-intersection-points-between-3-spheres
+// //' 
+// //' This function is called by mkEll_s2 in MAPI_RunOnGrid.
+// //' In order to build ellipse polygon, compute pairs of points as the intersection of three spheres:
+// //' the earth, a sphere centered on the first focus with given radius from great circle distance,
+// //' a sphere centered on the second focus with complementary radius from great circle distance
+// //' such as the sum of the great circle distances is the distance between the foci divided by 
+// //' eccentricity.
+// //' 
+//[[Rcpp::export(.trilaterate_cpp)]]
+Rcpp::DoubleVector trilaterate_cpp(double p0lon, double p0lat, double p1lon, double p1lat, double gc0, double gc1) {
+    Rcpp::DoubleVector resu(4);
+    std::vector<double> p0_xyz = to_xyz_cpp(p0lon, p0lat);
+    std::vector<double> p1_xyz = to_xyz_cpp(p1lon, p1lat);
+    const std::vector<double> p3_xyz(3, 0);
+    double r0 = greatCircle2chord_cpp(gc0);
+    double r1 = greatCircle2chord_cpp(gc1);
+    // temp1 <- P1.xyz - P0.xyz
+    std::vector<double> temp1(3);
+    temp1[0] = p1_xyz[0] - p0_xyz[0];
+    temp1[1] = p1_xyz[1] - p0_xyz[1];
+    temp1[2] = p1_xyz[2] - p0_xyz[2];
+    // norm1 <- base::norm(temp1, type="2")
+    double norm1 = l2_norm_cpp(temp1);
+    // e_x <- temp1 / norm1
+    std::vector<double> e_x(3);
+    e_x[0] = temp1[0] / norm1;
+    e_x[1] = temp1[1] / norm1;
+    e_x[2] = temp1[2] / norm1;
+    // temp2 <- P3.xyz - P0.xyz
+    std::vector<double> temp2(3);
+    temp2[0] = p3_xyz[0] - p0_xyz[0];
+    temp2[1] = p3_xyz[1] - p0_xyz[1];
+    temp2[2] = p3_xyz[2] - p0_xyz[2];
+    // i <- (e_x %*% temp2)[1,1]
+    double i = in_prod_cpp(e_x, temp2);
+    // temp3 <- temp2 - (i * e_x)
+    std::vector<double> temp3(3);
+    temp3[0] = temp2[0] - i*e_x[0];
+    temp3[1] = temp2[1] - i*e_x[1];
+    temp3[2] = temp2[2] - i*e_x[2];
+    // e_y <- temp3 / base::norm(temp3, type="2")
+    double norm3 = l2_norm_cpp(temp3);
+    std::vector<double> e_y(3);
+    e_y[0] = temp3[0] / norm3;
+    e_y[1] = temp3[1] / norm3;
+    e_y[2] = temp3[2] / norm3;
+    // e_z <- pracma::cross(e_x, e_y)
+    std::vector<double> e_z = cross_product_3_cpp(e_x, e_y);
+    // j <- (e_y %*% temp2)[1,1]
+    double j = in_prod_cpp(e_y, temp2);
+    // x <- (r0*r0 - r1*r1 + d*d) / (2*d)
+    double x = (r0*r0 - r1*r1 + norm1*norm1) / (2.0L * norm1);
+    // y <- (r0*r0 - r3*r3 - 2*i*x + i*i + j*j) / (2*j)
+    double y = (r0*r0 - EARTHRADIUS*EARTHRADIUS - 2.0L*i*x + i*i + j*j) / (2.0L*j);
+    // temp4 <- r0*r0 - x*x - y*y
+    double temp4 = r0*r0 - x*x - y*y;
+    if (isnan(temp4) || (temp4 < 0.0L)) {
+        // For debug
+        // Rcpp::Rcout << "The three spheres do not intersect!\n" << "p0lon=" << p0lon << " p0lat=" << p0lat << " p1lon=" << p1lon << " p1lat=" << p1lat << " gc0=" << gc0 << " gc1=" << gc1 << "\n";
+        temp4 = NAN;
+    }
+    // z <- sqrt(temp4)
+    double z = sqrt(temp4);
+    // p_12_a <- P0.xyz + x*e_x + y*e_y + z*e_z
+    double p12ax = p0_xyz[0] + x*e_x[0] + y*e_y[0] + z*e_z[0];
+    double p12ay = p0_xyz[1] + x*e_x[1] + y*e_y[1] + z*e_z[1];
+    double p12az = p0_xyz[2] + x*e_x[2] + y*e_y[2] + z*e_z[2];
+    // p_12_b <- P0.xyz + x*e_x + y*e_y - z*e_z
+    double p12bx = p0_xyz[0] + x*e_x[0] + y*e_y[0] - z*e_z[0];
+    double p12by = p0_xyz[1] + x*e_x[1] + y*e_y[1] - z*e_z[1];
+    double p12bz = p0_xyz[2] + x*e_x[2] + y*e_y[2] - z*e_z[2];
+    // return(list(from.xyz(p_12_a), from.xyz(p_12_b)))
+    std::vector<double> p12a = from_xyz_cpp(p12ax, p12ay, p12az);
+    std::vector<double> p12b = from_xyz_cpp(p12bx, p12by, p12bz);
+    resu(0) = p12a[0];
+    resu(1) = p12a[1];
+    resu(2) = p12b[0];
+    resu(3) = p12b[1];
+    return(resu);
 }
