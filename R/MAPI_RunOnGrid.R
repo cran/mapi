@@ -447,7 +447,7 @@ MAPI_RunOnGrid <- function(samples, metric, grid, isMatrix=FALSE, ecc=0.975, err
                     message(sprintf("... parallelized over %d cores ...", nbCores))
                     doParallel::registerDoParallel(nbCores)
                     doIt <- function(todo) {
-                        resu2 <- foreach::foreach( i=todo, .verbose=FALSE, .combine=cbind ) %dopar% {
+                        resu2 <- foreach::foreach( i=todo, .export=c("my.samples_perm", "my.samples", "sampX", "my.metric", "inter", "grid"), .verbose=FALSE, .combine=cbind ) %dopar% {
                             cat(sprintf("%d ",i))
                             .doPerm(i, my.samples_perm, my.samples, sampX, my.metric, inter, grid)
                         }
