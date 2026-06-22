@@ -32,6 +32,21 @@ MAPI_CheckData <- function(samples, metric, isMatrix=all(("matrix" %in% class(me
     `%notin%` <- Negate(`%in%`)
     my.samples <- data.table::as.data.table(samples)
     my.samples$ind <- as.character(my.samples$ind) # Avoids factors...
+    # check existing coordinates columns
+    if ("x" %notin% colnames(my.samples)) {
+        if ("X" %in% colnames(my.samples)) {
+            data.table::setnames(my.samples, "X", "x")
+        } else {
+            stop("Column `x` missing in samples")
+        }
+    }
+    if ("y" %notin% colnames(my.samples)) {
+        if ("Y" %in% colnames(my.samples)) {
+            data.table::setnames(my.samples, "Y", "y")
+        } else {
+            stop("Column `y` missing in samples")
+        }
+    }
     my.samples$x <- as.numeric(as.character(my.samples$x)) # Avoids factors & convert to numeric...
     my.samples$y <- as.numeric(as.character(my.samples$y))# Avoids factors & convert to numeric...
     data.table::setkey(my.samples, "ind")

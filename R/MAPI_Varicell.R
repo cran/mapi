@@ -42,6 +42,8 @@
 
 MAPI_Varicell <- function(grid, samples, buf=0, var.coef=50) {
     
+    message("Building local cartesian irregular grid...")
+
     # Convert samples into spatial sf object
     samples.g <- sf::st_as_sf(samples, coords=c("x", "y"), crs=sf::st_crs(grid))
     
@@ -78,5 +80,6 @@ MAPI_Varicell <- function(grid, samples, buf=0, var.coef=50) {
     # add gid column
     grid.out$gid <- seq(1,nrow(grid.out))
     # Returns the result
+    message(paste("...", nrow(grid.out), "cells"))
     return(grid.out)
 }

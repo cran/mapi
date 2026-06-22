@@ -1,5 +1,6 @@
-# mapi (version 1.1.4)
+# mapi (version 1.1.5)
 ## NEW FEATURES
+2026-03-23: Deprecated ggplot2::aes_string function replaced by .data[['<var>']]
 2025-06-25: Faster implementation of adaptive grid resolution `MAPI_Varicell (cartesian grids only!)`
 2024-02-20: Added experimental option ignore.weights in MAPI_RunOnGrid
 2022-02-01: New code for worldwide dataset based on s2 spherical library

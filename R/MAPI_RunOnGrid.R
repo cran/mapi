@@ -228,6 +228,8 @@ MAPI_RunOnGrid <- function(samples, metric, grid, isMatrix=FALSE, ecc=0.975, err
             ellipses <- data.table::merge.data.table(ellipses, distinct.locations, by.x="loc2", by.y="locCode")
             ellipses <- data.table::merge.data.table(ellipses, distinct.locations, by.x="loc1", by.y="locCode", suffixes=c("2","1"))
             
+            base::message(base::sprintf("Computing %s geographical distances...", base::nrow(ellipses)))
+            
             # computes distance between the two localities (Orthodromic or Pythagore)
             if (mapi.spherical) {
                 if (nbCores > 1) {
@@ -254,7 +256,7 @@ MAPI_RunOnGrid <- function(samples, metric, grid, isMatrix=FALSE, ecc=0.975, err
             if (!base::is.na(dMin) && dMin > 0)                             { ellipses <- ellipses[ellipses$dist >= dMin, ] }
             if (!base::is.infinite(dMax) && !base::is.na(dMax) && dMax > 0) { ellipses <- ellipses[ellipses$dist <= dMax, ] }
             
-            base::message(base::sprintf("Building %s elliptical polygons...", base::nrow(ellipses)))
+            base::message(base::sprintf("Building %s distinct elliptical polygons...", base::nrow(ellipses)))
             
             # sort the completed half-matrix [NOTE: why?] and add rowid
             ellipses <- ellipses[base::order(ellipses$dlid1, ellipses$dlid2) , ]
