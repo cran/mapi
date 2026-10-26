@@ -8,6 +8,7 @@
 #' @param crs coordinate reference system: integer with the EPSG code, or character with proj4string. 
 #'   The coordinates system must be a projection, not latitude/longitude.
 #' @param beta A value depending on spatial regularity of sampling: 0.5 for regular sampling, 0.25 for random sampling (Hengl, 2006).
+#' @param silent Boolean, FALSE by default. Suppress output messages when set to TRUE.
 #' 
 #' @details 
 #' \eqn{h_w = \frac{\beta \sqrt{A/N}}{\sqrt{2.5980}}}{hw = p / sqrt(2.5980) with p = beta * sqrt(A/N)}, where A is the study area (convex hull of sampling points) and N the number of samples. 
@@ -24,11 +25,11 @@
 #' Hengl, T. (2006) Finding the right pixel size. Computers & Geosciences, 32, 1283--1298.
 #' 
 
-MAPI_EstimateHalfwidth <- function(samples, crs, beta=0.25) {
+MAPI_EstimateHalfwidth <- function(samples, crs, beta=0.25, silent=FALSE) {
     my.crs <- sf::st_crs(crs)
     samples2 <- sf::st_as_sf(samples, coords=c("x", "y"), crs=my.crs)
     if (sf::st_is_longlat(samples2)) {
-        message("NOTE: coordinates are in angular units, note that x stands for longitude and y for latitude.")
+        if (!silent) { message("NOTE: coordinates are in angular units, note that x stands for longitude and y for latitude.") }
         my.ch <- s2::s2_convex_hull_agg(sf::st_as_s2(samples2$geometry))
         # whether convex hull exists or not...
         if (s2::s2_is_empty(my.ch)) {
@@ -47,6 +48,6 @@ MAPI_EstimateHalfwidth <- function(samples, crs, beta=0.25) {
     N <- nrow(samples)
     p <- beta*sqrt(A/N)
     hw <- p/sqrt(2.5980) # NOTE: Should be 2.598076211 but rounded for compatibility with old SQL version
-    message(sprintf("Estimated halfwidth: %f", hw))
+    if (!silent) { message(sprintf("Estimated halfwidth: %f", hw)) }
     return(hw)
 }

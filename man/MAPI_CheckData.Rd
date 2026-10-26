@@ -7,7 +7,8 @@
 MAPI_CheckData(
   samples,
   metric,
-  isMatrix = all(("matrix" \%in\% class(metric)), (nrow(metric) == ncol(metric)))
+  isMatrix = all(("matrix" \%in\% class(metric)), (nrow(metric) == ncol(metric))),
+  silent = FALSE
 )
 }
 \arguments{
@@ -21,6 +22,8 @@ If data.frame, column names must be: 'ind1', 'ind2', 'value'.  If matrix, sample
 TRUE if 'metric' is a square matrix with column names = row names and standing for sample names.\cr
 FALSE if 'metric is a three columns data.frame ('ind1', 'ind2', 'value'). \cr
 The default value is determined using a "matrix" class detection for 'metric' as well as identity between row and column number.}
+
+\item{silent}{Boolean, FALSE by default. Suppress output messages when set to TRUE.}
 }
 \value{
 a list of two data.table objects corresponding to 'samples' and 'metric' after cleaning.

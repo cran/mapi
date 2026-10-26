@@ -17,6 +17,7 @@ MAPI_RunOnGrid(
   use_s2 = FALSE,
   nbCores = parallel::detectCores() - 1,
   N = 8,
+  silent = FALSE,
   ignore.weights = FALSE
 )
 }
@@ -63,8 +64,10 @@ On a cluster you might have to set it to a reasonable value (eg. 8) in order to 
 \item{N}{number of points used per quarter of ellipse, 8 by default.
 Don't change it unless you really know what you are doing.}
 
+\item{silent}{Suppress information messages if TRUE.}
+
 \item{ignore.weights}{allow to compute a simple mean instead of the default weighted mean.
-This implies that all ellipses bear the same weight.}
+This implies that all ellipses bear the same weight (1.0).}
 }
 \value{
 a spatial object of class 'sf' providing for each cell: \cr
@@ -108,6 +111,7 @@ my.grid <- MAPI_GridHexagonal(samples, crs=3857, 500) # 500m halfwidth
 my.results <- MAPI_RunOnGrid(samples, metric, grid=my.grid, nbPermuts=10, nbCores=1)
 
 # eg. Export results to shapefile "myFirstMapiResult" in current directory
+library(sf)
 sf::st_write(my.results, dsn=".", layer="myFirstMapiResult", driver="ESRI Shapefile")
 }
 

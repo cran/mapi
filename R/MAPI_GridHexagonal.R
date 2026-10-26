@@ -19,6 +19,7 @@
 #' @param buf optional. This parameter allows to expand or shrink the grid by a number of units in 
 #'   the same reference system as the sample geographical coordinates (0 by default, ignored for
 #'   worldwide grids).
+#' @param silent Boolean, FALSE by default. Suppress output messages when set to TRUE.
 #' 
 #' @return a spatial object of class 'sf' including the x and y coordinates of cell centers, 
 #' cell geometry (polygons) and cell id (gid).
@@ -30,7 +31,7 @@
 #' grid <- MAPI_GridHexagonal(samples, crs=3857, hw=250)
 #' 
 
-MAPI_GridHexagonal <- function(samples, crs, hw, buf=0) {
+MAPI_GridHexagonal <- function(samples, crs, hw, buf=0, silent=FALSE) {
     # Deprecated option
     shift <- FALSE
     # Convert samples into spatial sf object
@@ -42,7 +43,7 @@ MAPI_GridHexagonal <- function(samples, crs, hw, buf=0) {
             # WARNING: dggridR is currently not available from CRAN
             # For more information see: https://github.com/r-barnes/dggridR
             
-            message("Building worldwide lat/lon grid...")
+            if (!silent) { message("Building worldwide lat/lon grid...") }
             # Build grid specifications
             # NOTE: spacing in km!
             my.grid.specs <- dggridR::dgconstruct(spacing=hw*2/1000, metric=TRUE, resround='down')
@@ -64,12 +65,12 @@ MAPI_GridHexagonal <- function(samples, crs, hw, buf=0) {
             # Reorder columns
             grid <- grid[ , c("gid","x","y","geometry")]
         } else {
-            stop("Error: Package 'dggridR' is not installed.")
+            stop("Error: Package 'dggridR' is not installed. See https://github.com/r-barnes/dggridR for more informations.")
         }
         
     } else {
     
-        message("Building local cartesian grid...")
+        if (!silent) { message("Building local cartesian grid...") }
         # Computes study area (possibly modified by optionnal buffer)
         study.area <- sf::st_buffer(sf::st_convex_hull(sf::st_union(samples2$geometry)), buf)
         
@@ -151,6 +152,6 @@ MAPI_GridHexagonal <- function(samples, crs, hw, buf=0) {
         
     }    
     # Work done, return the grid
-    message(paste("...", nrow(grid), "cells"))
+    if (!silent) { message(paste("...", nrow(grid), "cells")) }
     return(grid)
 }

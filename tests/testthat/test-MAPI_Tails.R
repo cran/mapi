@@ -1,7 +1,7 @@
 library("parallel")
 library("testthat")
 library("mapi")
-test_that("MAPI_RunOnGrid", {
+test_that("MAPI_Tails", {
   data("samples")
   data("metric")
   grid <- MAPI_GridHexagonal(samples, crs=3857, hw=250)

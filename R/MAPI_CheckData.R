@@ -11,6 +11,7 @@
 #'   TRUE if 'metric' is a square matrix with column names = row names and standing for sample names.\cr
 #'   FALSE if 'metric is a three columns data.frame ('ind1', 'ind2', 'value'). \cr
 #'   The default value is determined using a "matrix" class detection for 'metric' as well as identity between row and column number.
+#' @param silent Boolean, FALSE by default. Suppress output messages when set to TRUE.
 #' 
 #' @return a list of two data.table objects corresponding to 'samples' and 'metric' after cleaning.
 #' 
@@ -26,11 +27,12 @@
 #' }
 #' 
 
-MAPI_CheckData <- function(samples, metric, isMatrix=all(("matrix" %in% class(metric)), (nrow(metric)==ncol(metric)))) {
+MAPI_CheckData <- function(samples, metric, isMatrix=all(("matrix" %in% class(metric)), (nrow(metric)==ncol(metric))), silent=FALSE) {
   
     message("Checking data...")
     `%notin%` <- Negate(`%in%`)
     my.samples <- data.table::as.data.table(samples)
+    base::colnames(my.samples) <- base::tolower(base::colnames(my.samples))
     my.samples$ind <- as.character(my.samples$ind) # Avoids factors...
     # check existing coordinates columns
     if ("x" %notin% colnames(my.samples)) {
@@ -56,16 +58,17 @@ MAPI_CheckData <- function(samples, metric, isMatrix=all(("matrix" %in% class(me
         if (sum( colnames(metric) != rownames(metric) ) > 0) {
             stop("Row names and column names are different") 
         } else {
-            message("`metric` matrix symmetrical ... OK")
+            if (!silent) message("`metric` matrix symmetrical ... OK")
         }
         my.metric <- data.table::as.data.table(metric)
         my.metric$tmpId <- rownames(metric)
         my.metric <- data.table::melt(my.metric, id.vars=c("tmpId"), variable.factor=FALSE, value.factor=FALSE)
     } else {
-        message("`metric` provided as a vector")
+        if (!silent) message("`metric` provided as a vector")
         my.metric <- data.table::as.data.table(metric)
     }
     colnames(my.metric) <- c("ind1", "ind2", "value")
+    my.metric <- my.metric[ !is.na(my.metric$value) , ]
     
     my.metric$ind1 <- as.character(my.metric$ind1) # Avoids factors...
     my.metric$ind2 <- as.character(my.metric$ind2) # Avoids factors...
@@ -77,7 +80,7 @@ MAPI_CheckData <- function(samples, metric, isMatrix=all(("matrix" %in% class(me
     if (anyDuplicated(my.samples$ind)) {
         stop("Names of individuals are not unique.") 
     } else {
-        message("Unique names ... OK")
+        if (!silent) message("Unique names ... OK")
     }
     
     my.samples <- my.samples[!(is.na(my.samples$x)|is.na(my.samples$y)) , ]
@@ -86,7 +89,7 @@ MAPI_CheckData <- function(samples, metric, isMatrix=all(("matrix" %in% class(me
     if (length(tri) != 0) {
         warning(sprintf("Following samples have no metric and have been removed: %s", paste(tri, collapse=", ")))
     } else {
-        message("All samples used in metric ... OK")
+        if (!silent) message("All samples used in metric ... OK")
     }
 
     tri_ind1 <- my.metric[ !(my.metric$ind1 %in% my.samples$ind) , ]$ind1
@@ -105,7 +108,7 @@ MAPI_CheckData <- function(samples, metric, isMatrix=all(("matrix" %in% class(me
     data.table::setkey(my.metric, "ind1", "ind2")
     my.metric <- my.metric[order(as.character(my.metric$ind1),as.character(my.metric$ind2)),]
 
-    message(paste("...",  nrow(my.samples), "samples and",  nrow(my.metric), "metric left."))
+    if (!silent) message(paste("...",  nrow(my.samples), "samples and",  nrow(my.metric), "metric left."))
     
     return( list(samples=my.samples, metric=my.metric) )
 }

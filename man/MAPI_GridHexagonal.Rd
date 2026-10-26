@@ -4,7 +4,7 @@
 \alias{MAPI_GridHexagonal}
 \title{Function MAPI_GridHexagonal}
 \usage{
-MAPI_GridHexagonal(samples, crs, hw, buf = 0)
+MAPI_GridHexagonal(samples, crs, hw, buf = 0, silent = FALSE)
 }
 \arguments{
 \item{samples}{a data.frame with names and geographical coordinates of samples. Column names must be: 'ind', 'x', 'y'.
@@ -19,6 +19,8 @@ This allows computation but, of course, has no geographical meaning.}
 \item{buf}{optional. This parameter allows to expand or shrink the grid by a number of units in
 the same reference system as the sample geographical coordinates (0 by default, ignored for
 worldwide grids).}
+
+\item{silent}{Boolean, FALSE by default. Suppress output messages when set to TRUE.}
 }
 \value{
 a spatial object of class 'sf' including the x and y coordinates of cell centers,

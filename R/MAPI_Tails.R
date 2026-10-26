@@ -10,6 +10,7 @@
 #'   This parameter allows to discard cells for which the average value of the pairwise metric is computed 
 #'   using either a small number and/or only long-distance ellipses.
 #' @param alpha Significance level (default=0.05)
+#' @param silent Boolean, FALSE by default. Suppress output messages when set to TRUE.
 #' 
 #' @return a spatial object of class 'sf' with the area and geometry of the polygons delineating the significant areas. 
 #'    A column provides the tail for each polygon (upper or lower).
@@ -41,13 +42,13 @@
 #' Benjamini, Y. and Yekutieli, D. (2001). The control of the false discovery rate in multiple testing under dependency. Annals of Statistics 29, 1165–1188.
 
 
-MAPI_Tails <- function(resu, minQ=0, alpha=0.05) {
+MAPI_Tails <- function(resu, minQ=0, alpha=0.05, silent=FALSE) {
     # discard empty cells, if any
     resu <- resu[!is.na(resu$avg_value) , ]
-    
+
     # check data availability
     if (any(colnames(resu)=="ltP") || any(colnames(resu)=="utP")) {
-        message(sprintf("Significant areas aggregation, with percentile filter minQ > %f and alpha = %f ...", minQ, alpha))
+        if (!silent) { message(sprintf("Significant areas aggregation, with percentile filter minQ > %d and alpha = %f ...", minQ, alpha)) }
     } else {
         stop("Error: no adjusted probabiblites for lower- and upper-tail columns (\"ltP\", \"utP\") found in results table provided.")
     }

@@ -1,5 +1,6 @@
-# mapi (version 1.1.5)
+# mapi (version 1.1.6)
 ## NEW FEATURES
+2026-10-23: silent option introduced in many functions; new option ignore.weights in MAPI_RunOnGrid.
 2026-03-23: Deprecated ggplot2::aes_string function replaced by .data[['<var>']]
 2025-06-25: Faster implementation of adaptive grid resolution `MAPI_Varicell (cartesian grids only!)`
 2024-02-20: Added experimental option ignore.weights in MAPI_RunOnGrid

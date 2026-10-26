@@ -34,7 +34,8 @@
 #' @param N number of points used per quarter of ellipse, 8 by default. 
 #'   Don't change it unless you really know what you are doing.
 #' @param ignore.weights allow to compute a simple mean instead of the default weighted mean.
-#'   This implies that all ellipses bear the same weight.
+#'   This implies that all ellipses bear the same weight (1.0).
+#' @param silent Suppress information messages if TRUE.
 #' 
 #' @return a spatial object of class 'sf' providing for each cell: \cr
 #'  - gid: Cell ID \cr
@@ -74,12 +75,13 @@
 #' my.results <- MAPI_RunOnGrid(samples, metric, grid=my.grid, nbPermuts=10, nbCores=1)
 #' 
 #' # eg. Export results to shapefile "myFirstMapiResult" in current directory
+#' library(sf)
 #' sf::st_write(my.results, dsn=".", layer="myFirstMapiResult", driver="ESRI Shapefile")
 #' }
 #' 
 
 
-MAPI_RunOnGrid <- function(samples, metric, grid, isMatrix=FALSE, ecc=0.975, errRad=10, nbPermuts=0, dMin=0, dMax=Inf, use_s2=FALSE, nbCores=parallel::detectCores()-1, N=8, ignore.weights=FALSE) {
+MAPI_RunOnGrid <- function(samples, metric, grid, isMatrix=FALSE, ecc=0.975, errRad=10, nbPermuts=0, dMin=0, dMax=Inf, use_s2=FALSE, nbCores=parallel::detectCores()-1, N=8, silent=FALSE, ignore.weights=FALSE) {
     message("MAPI COMPUTATION STARTED")
     if (!("sf" %in% class(grid))) {stop("grid parameter is not a 'sf' object!")}
     if (base::requireNamespace("doParallel", quietly=TRUE) && base::requireNamespace("foreach", quietly=TRUE)) {
@@ -89,7 +91,7 @@ MAPI_RunOnGrid <- function(samples, metric, grid, isMatrix=FALSE, ecc=0.975, err
         `%dopar%` <- NA
     }
     tot <- system.time({
-        my.data.in <- MAPI_CheckData(samples, metric, isMatrix=isMatrix)
+        my.data.in <- MAPI_CheckData(samples, metric, isMatrix=isMatrix, silent=silent)
         my.samples <- my.data.in[[1]]
         my.metric <- my.data.in[[2]]
         # prepare index
@@ -328,11 +330,11 @@ MAPI_RunOnGrid <- function(samples, metric, grid, isMatrix=FALSE, ecc=0.975, err
         })
         tv <- as.vector(t) ; tv[is.na(tv)] <- 0.0
         # NOTE: %s used for stringified integers due to overflow for very large datasets (thanks to Simon Dellicour)
-        message(sprintf("... %s ellipses.    [user: %0.3f, system: %0.3f, elapsed: %0.3f seconds]", as.character(nrow(ellipses)), tv[1]+tv[4], tv[2]+tv[5], tv[3]))
+        if (!silent) { message(sprintf("... %s ellipses.    [user: %0.3f, system: %0.3f, elapsed: %0.3f seconds]", as.character(nrow(ellipses)), tv[1]+tv[4], tv[2]+tv[5], tv[3])) }
 
         ## Spatial intersect between ellipses and grid
         # NOTE: %s used for stringified integers due to overflow for very large datasets (thanks to Simon Dellicour)
-        message(sprintf("Computing spatial intersection between %s grid cells and %s ellipses...", as.character(nrow(grid)), as.character(nrow(ellipses))))
+        if (!silent) { message(sprintf("Computing spatial intersection between %s grid cells and %s ellipses...", as.character(nrow(grid)), as.character(nrow(ellipses)))) }
         t <- system.time({
             if (mapi.spherical) {
                 g2 <- sf::st_as_s2(grid)
@@ -354,13 +356,13 @@ MAPI_RunOnGrid <- function(samples, metric, grid, isMatrix=FALSE, ecc=0.975, err
             }
         })
         tv <- as.vector(t) ; tv[is.na(tv)] <- 0.0
-        message(sprintf("... done.  [user: %0.3f, system: %0.3f, elapsed: %0.3f seconds]", tv[1]+tv[4], tv[2]+tv[5], tv[3]))
+        if (!silent) { message(sprintf("... done.  [user: %0.3f, system: %0.3f, elapsed: %0.3f seconds]", tv[1]+tv[4], tv[2]+tv[5], tv[3])) }
         # We are finished with the ellipses geometry, let's free some memory
         rm(ellipses) # free memory
         
         
         ## Build sample pairs
-        message("Building sample pairs...")
+        if (!silent) { message("Building sample pairs...") }
         t <- system.time({
             # build a simple table with sample code and locality code only
             my.sampleCode.locCode <- data.table::data.table(ind=my.samples.geom$ind, locCode=my.samples.geom$locCode)
@@ -385,11 +387,11 @@ MAPI_RunOnGrid <- function(samples, metric, grid, isMatrix=FALSE, ecc=0.975, err
         })
         tv <- as.vector(t) ; tv[is.na(tv)] <- 0.0
         # NOTE: %s used for stringified integers due to overflow for very large datasets (thanks to Simon Dellicour)
-        message(sprintf("... %s sample pairs.  [user: %0.3f, system: %0.3f, elapsed: %0.3f seconds]", as.character(nrow(sampX)), tv[1]+tv[4], tv[2]+tv[5], tv[3]))
+        if (!silent) { message(sprintf("... %s sample pairs.  [user: %0.3f, system: %0.3f, elapsed: %0.3f seconds]", as.character(nrow(sampX)), tv[1]+tv[4], tv[2]+tv[5], tv[3])) }
         
         
         ## Expand results from intersection between grid and ellipses into a clean list of vectors of sample pairs ids
-        message("Matching grid cells with sample pairs...")
+        if (!silent) { message("Matching grid cells with sample pairs...") }
         t <- system.time({
             # sample pairs with symmetrized localities for faster merges
             sampX2 <- rbind(sampX[ , c("id", "locCode1", "locCode2")], sampX[ , c("id", "locCode2", "locCode1")])
@@ -412,12 +414,12 @@ MAPI_RunOnGrid <- function(samples, metric, grid, isMatrix=FALSE, ecc=0.975, err
         tv <- as.vector(t) ; tv[is.na(tv)] <- 0.0
         if (is.na(nbMatches)) { nbMatches <- 0 }
         # NOTE: %s used for stringified integers due to overflow for very large datasets (thanks to Simon Dellicour)
-        message(sprintf("... %s matches found.  [user: %0.3f, system: %0.3f, elapsed: %0.3f seconds]", as.character(nbMatches), tv[1]+tv[4], tv[2]+tv[5], tv[3]))
+        if (!silent) { message(sprintf("... %s matches found.  [user: %0.3f, system: %0.3f, elapsed: %0.3f seconds]", as.character(nbMatches), tv[1]+tv[4], tv[2]+tv[5], tv[3])) }
         
         
         ## Get results for unpermuted MAPI analysis
         # For each cell, we compute the number of intersecting ellipses, the sum of their weightd, the weighted mean and weighted standard deviation.
-        message("Computing values for grid cells...")
+        if (!silent) { message("Computing values for grid cells...") }
         t <- system.time({
             # Call to C++ function parseInter_cpp which iterates on grid, intersetion and sample pairs for computing values
             resu <- data.table::as.data.table(.parseInter_cpp(grid$gid, inter, sampX$weight, sampX$value))
@@ -429,7 +431,7 @@ MAPI_RunOnGrid <- function(samples, metric, grid, isMatrix=FALSE, ecc=0.975, err
             resu <- merge(grid, resu, by="gid", all.x=TRUE)
         })
         tv <- as.vector(t) ; tv[is.na(tv)] <- 0.0
-        message(sprintf("... done.  [user: %0.3f, system: %0.3f, elapsed: %0.3f seconds]", tv[1]+tv[4], tv[2]+tv[5], tv[3]))
+        if (!silent) { message(sprintf("... done.  [user: %0.3f, system: %0.3f, elapsed: %0.3f seconds]", tv[1]+tv[4], tv[2]+tv[5], tv[3])) }
         
 
         
@@ -437,7 +439,7 @@ MAPI_RunOnGrid <- function(samples, metric, grid, isMatrix=FALSE, ecc=0.975, err
         ##########################################################################################################################################################
         if(nbPermuts > 0) {
             t <- system.time({
-                message(sprintf("Starting %d permutations...", nbPermuts))
+                if (!silent) { message(sprintf("Starting %d permutations...", nbPermuts)) }
                 
                 # prepare permuted samples table
                 my.samples_perm <- data.table::data.table(ind=my.samples$ind)
@@ -446,7 +448,8 @@ MAPI_RunOnGrid <- function(samples, metric, grid, isMatrix=FALSE, ecc=0.975, err
                 # run permutation function (parallel or not)
                 if (nbCores > 1) {
                     # parallelized
-                    message(sprintf("... parallelized over %d cores ...", nbCores))
+                    if (!silent) { message(sprintf("... parallelized over %d cores ...", nbCores)) }
+
                     doParallel::registerDoParallel(nbCores)
                     doIt <- function(todo) {
                         resu2 <- foreach::foreach( i=todo, .export=c("my.samples_perm", "my.samples", "sampX", "my.metric", "inter", "grid"), .verbose=FALSE, .combine=cbind ) %dopar% {
@@ -459,7 +462,7 @@ MAPI_RunOnGrid <- function(samples, metric, grid, isMatrix=FALSE, ecc=0.975, err
                     doParallel::stopImplicitCluster()
                 } else {
                     # serially
-                    message(sprintf("... serially ..."))
+                    if (!silent) { message(sprintf("... serially ...")) }
                     pbs <- utils::txtProgressBar(max=nbPermuts, style=3, width=80)
                     resu2 <- data.table::as.data.table(lapply(1:nbPermuts, function(i){
                         pp <- .doPerm(i, my.samples_perm, my.samples, sampX, my.metric, inter, grid)
@@ -469,7 +472,7 @@ MAPI_RunOnGrid <- function(samples, metric, grid, isMatrix=FALSE, ecc=0.975, err
                     close(pbs) # end of progress bar
                 }
                 
-                message("... computing probabilities from permuted values ...")
+                if (!silent) { message("... computing probabilities from permuted values ...") }
                 resu$proba <- NA
                 resu2 <- as.matrix(resu2) # faster for getting a row ;-)
                 for(i in 1:nrow(resu)) {
@@ -484,7 +487,7 @@ MAPI_RunOnGrid <- function(samples, metric, grid, isMatrix=FALSE, ecc=0.975, err
                 
             })
             tv <- as.vector(t) ; tv[is.na(tv)] <- 0.0
-            message(sprintf("... done.  [user: %0.3f, system: %0.3f, elapsed: %0.3f seconds]", tv[1]+tv[4], tv[2]+tv[5], tv[3]))
+            if (!silent) { message(sprintf("... done.  [user: %0.3f, system: %0.3f, elapsed: %0.3f seconds]", tv[1]+tv[4], tv[2]+tv[5], tv[3])) }
         }
         ##########################################################################################################################################################
     })
@@ -495,7 +498,8 @@ MAPI_RunOnGrid <- function(samples, metric, grid, isMatrix=FALSE, ecc=0.975, err
     }
     
     tv <- as.vector(tot) ; tv[is.na(tv)] <- 0.0
-    message(sprintf("MAPI COMPUTATION ENDED.  [TOTAL: user: %0.3f, system: %0.3f, elapsed: %0.3f seconds]", tv[1]+tv[4], tv[2]+tv[5], tv[3]))
+
+    if (!silent) { message(sprintf("MAPI COMPUTATION ENDED.  [TOTAL: user: %0.3f, system: %0.3f, elapsed: %0.3f seconds]", tv[1]+tv[4], tv[2]+tv[5], tv[3])) }
     return(resu)
 }
 

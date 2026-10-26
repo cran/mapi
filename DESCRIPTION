@@ -1,6 +1,6 @@
 Package: mapi
 Title: Mapping Averaged Pairwise Information
-Version: 1.1.5
+Version: 1.1.6
 Authors@R: c(
     person("Sylvain", "Piry", , "sylvain.piry@inrae.fr", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-7717-7555")),
@@ -26,7 +26,7 @@ Suggests: dggridR, ggplot2, latticeExtra, progress, sp, testthat (>=
 Config/testthat/edition: 3
 LazyData: true
 NeedsCompilation: yes
-Packaged: 2026-06-22 15:05:23 UTC; piry
+Packaged: 2026-10-23 13:55:43 UTC; piry
 Author: Sylvain Piry [aut, cre] (ORCID:
     <https://orcid.org/0000-0002-7717-7555>),
   Thomas Campolunghi [aut],
@@ -34,4 +34,4 @@ Author: Sylvain Piry [aut, cre] (ORCID:
   Karine Berthier [aut] (ORCID: <https://orcid.org/0000-0002-2260-7968>)
 Maintainer: Sylvain Piry <sylvain.piry@inrae.fr>
 Repository: CRAN
-Date/Publication: 2026-06-22 16:00:09 UTC
+Date/Publication: 2026-10-26 10:50:02 UTC

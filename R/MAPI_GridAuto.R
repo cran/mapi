@@ -18,6 +18,7 @@
 #' @param beta A value depending on sampling regularity: 0.5 for regular sampling, 0.25 for random sampling (Hengl, 2006).
 #' @param buf optional. This parameter allows to expand or shrink the grid by a number of units in the 
 #'   same reference system as the sample geographical coordinates (0 by default).
+#' @param silent Boolean, FALSE by default. Suppress output messages when set to TRUE.
 #'   
 #' @details 
 #' The halfwidth cell value used to build the grid is computed as 
@@ -35,8 +36,8 @@
 #' grid <- MAPI_GridAuto(samples, crs=3857, beta=0.5)
 #'
 
-MAPI_GridAuto <- function(samples, crs, beta=0.25, buf=0) {
-    hw <- MAPI_EstimateHalfwidth(samples, crs=crs, beta=beta)
-    grid <- MAPI_GridHexagonal(samples, crs=crs, hw=hw, buf=buf)
+MAPI_GridAuto <- function(samples, crs, beta=0.25, buf=0, silent=FALSE) {
+    hw <- MAPI_EstimateHalfwidth(samples, crs=crs, beta=beta, silent=silent)
+    grid <- MAPI_GridHexagonal(samples, crs=crs, hw=hw, buf=buf, silent=silent)
     return(grid)
 }

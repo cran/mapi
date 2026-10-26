@@ -4,7 +4,7 @@
 \alias{MAPI_Tails}
 \title{Function MAPI_Tails}
 \usage{
-MAPI_Tails(resu, minQ = 0, alpha = 0.05)
+MAPI_Tails(resu, minQ = 0, alpha = 0.05, silent = FALSE)
 }
 \arguments{
 \item{resu}{A spatial object of class 'sf' resulting from a MAPI analysis done using either
@@ -15,6 +15,8 @@ This parameter allows to discard cells for which the average value of the pairwi
 using either a small number and/or only long-distance ellipses.}
 
 \item{alpha}{Significance level (default=0.05)}
+
+\item{silent}{Boolean, FALSE by default. Suppress output messages when set to TRUE.}
 }
 \value{
 a spatial object of class 'sf' with the area and geometry of the polygons delineating the significant areas.

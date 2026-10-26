@@ -4,7 +4,7 @@
 \alias{MAPI_EstimateHalfwidth}
 \title{Function MAPI_EstimateHalfwidth}
 \usage{
-MAPI_EstimateHalfwidth(samples, crs, beta = 0.25)
+MAPI_EstimateHalfwidth(samples, crs, beta = 0.25, silent = FALSE)
 }
 \arguments{
 \item{samples}{a data.frame with names and geographical coordinates of samples. Column names must be: 'ind', 'x', 'y'.
@@ -15,6 +15,8 @@ Coordinates must be projected (not latitude/longitude).}
 The coordinates system must be a projection, not latitude/longitude.}
 
 \item{beta}{A value depending on spatial regularity of sampling: 0.5 for regular sampling, 0.25 for random sampling (Hengl, 2006).}
+
+\item{silent}{Boolean, FALSE by default. Suppress output messages when set to TRUE.}
 }
 \value{
 halfwidth cell value (side length of hexagonal cells).

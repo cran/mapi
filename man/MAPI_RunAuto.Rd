@@ -18,7 +18,8 @@ MAPI_RunAuto(
   dMax = Inf,
   nbCores = ifelse(requireNamespace("parallel", quietly = TRUE), parallel::detectCores()
     - 1, 1),
-  N = 8
+  N = 8,
+  silent = FALSE
 )
 }
 \arguments{
@@ -62,6 +63,8 @@ On a cluster you might have to set it to a reasonable value (eg. 8) in order to 
 
 \item{N}{number of points used per quarter of ellipse, 8 by default.
 Don't change it unless you really know what you are doing.}
+
+\item{silent}{Boolean, FALSE by default. Suppress output messages when set to TRUE.}
 }
 \value{
 a spatial object of class 'sf' providing for each cell: \cr
